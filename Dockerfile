@@ -18,13 +18,17 @@ WORKDIR $ROS_WS/src
 
 # Copy your ROS2 package into the workspace
 COPY ./src/perception $ROS_WS/src/perception
+COPY ./src/navigation $ROS_WS/src/navigation
+COPY ./src/control $ROS_WS/src/control
+
+COPY ./src/my_launch_package $ROS_WS/src/my_launch_package
 
 # Go back to workspace root
 WORKDIR $ROS_WS
 
 # Install dependencies (if you have any dependencies in your package.xml)
-RUN apt-get update && rosdep update \
-    && rosdep install --from-paths src --ignore-src -r -y
+# RUN apt-get update && rosdep update \
+#     && rosdep install --from-paths src --ignore-src -r -y
 
 # Build the workspace
 RUN . /opt/ros/galactic/setup.sh && colcon build
@@ -35,4 +39,4 @@ RUN echo "source /ros2_ws/install/setup.bash" >> /root/.bashrc
 ENTRYPOINT ["/bin/bash", "-c"]
 
 # Command to run the container
-CMD ["source /ros2_ws/install/setup.bash && ros2 run perception initNode"]
+CMD ["source /ros2_ws/install/setup.bash && ros2 launch my_launch_package launch_packages.py"]
