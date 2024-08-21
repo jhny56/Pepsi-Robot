@@ -1,0 +1,25 @@
+# Use the official ROS Galactic base image
+FROM ros:galactic
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+ENV ROS_WS=/ros2_ws
+ENV ROS_DOMAIN_ID=56
+
+# Install ROS2 packages and common dependencies
+RUN apt-get update && apt-get install -y \
+    ros-galactic-rclcpp \
+    ros-galactic-control-msgs \
+    python3-colcon-common-extensions \
+    build-essential \
+    git \
+    vim \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set up environment sourcing
+RUN echo "source /opt/ros/galactic/setup.sh" >> /root/.bashrc
+
+# Create workspace directory
+WORKDIR $ROS_WS
+
+# This base image will contain all the common dependencies, ready to be used by other Dockerfiles
