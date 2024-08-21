@@ -1,0 +1,32 @@
+<root main_tree_to_execute = "MainTree" >
+    <BehaviorTree ID="MainTree">
+        <Sequence name="root_sequence">
+            <Sequence name="can_subtree">
+                <Fallback name = "can_finder">
+                    <FoundCan name="found_can"/>
+                    <SearchCan name="search_can"/>
+                </Fallback>
+                <Fallback name = "can_getter">
+                    <IsAtCan name="is_at_can"/>
+                    <GoToCan name="go_to_can"/>
+                </Fallback>
+                <Gripper name = "gripper"/>
+            </Sequence>
+            <Sequence name="QR_subtree">
+                <Fallback name = "QR_finder">
+                    <FoundQR name="found_qr"/>
+                    <SearchQR name="search_qr"/>
+                </Fallback>
+                <Fallback name = "QR_navigation">
+                    <IsAtQR name="is_at_qr"/>
+                    <GoToQR name="go_to_qr"/>
+                </Fallback>
+                <Fallback name = "black_strip_finder">
+                    <IsAtStrip name="is_at_strip"/>
+                    <GoToStrip name="go_to_strip"/>
+                </Fallback> 
+                <GripperCancel name = "gripper_cancel"/>               
+            </Sequence>
+        </Sequence>
+    </BehaviorTree>
+</root>
