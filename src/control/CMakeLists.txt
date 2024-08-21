@@ -10,6 +10,33 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
 
+find_package(control_msgs REQUIRED)
+find_package(rclcpp_action REQUIRED)
+
+# Include directories
+include_directories(include)
+
+# Add the executable for the action server
+add_executable(gripper_action_server src/gripper_action_server_main.cpp src/gripper_action_server.cpp)
+add_executable(gripper_action_client src/gripper_action_client.cpp)
+
+# Link dependencies to the executable
+ament_target_dependencies(gripper_action_server rclcpp rclcpp_action control_msgs)
+ament_target_dependencies(gripper_action_client rclcpp rclcpp_action control_msgs)
+
+# Install the executable
+install(DIRECTORY launch/
+  DESTINATION share/${PROJECT_NAME}/launch
+)
+install(TARGETS
+  gripper_action_server
+  DESTINATION lib/${PROJECT_NAME})
+install(TARGETS
+  gripper_action_client
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+
 add_executable(initNode src/initNode.cpp)
 target_include_directories(initNode PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -35,9 +62,5 @@ if(BUILD_TESTING)
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
-
-install(DIRECTORY launch/
-  DESTINATION share/${PROJECT_NAME}/launch
-)
 
 ament_package()
