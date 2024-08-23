@@ -9,13 +9,11 @@ import numpy as np
 
 class BlackBandDetector(Node):
     def __init__(self):
-        super().__init__('black_band_detector')
+        super().__init__('blackband_detector')
         self.bridge = CvBridge()
         self.image_sub = self.create_subscription(Image, '/camera/image_raw', self.image_callback, 10)
-        
         # Publisher for black band detection
         self.band_pub = self.create_publisher(Bool, '/black_band_detected', 10)
-        
         self.get_logger().info('BlackBandDetector node has been started.')
 
     def image_callback(self, msg):
@@ -57,7 +55,7 @@ class BlackBandDetector(Node):
             # Check if any contours have a significant area
             for contour in contours:
                 area = cv2.contourArea(contour)
-                if area > 100:  
+                if area > 100: 
                     detected = True
                     break
 

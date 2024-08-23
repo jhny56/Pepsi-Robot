@@ -5,11 +5,29 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='perception',
-            executable='initNode',
-            name='init_node',
+            executable='Blackband_detector',  # Adjusted path for the Python node
+            name='Blackband_detector',
             output='screen',
             parameters=[{
-                # Add any parameters you want to set for the node here
-            }]
+                # Add parameters here if needed
+            }],
+        ),
+        Node(
+            package='perception',
+            executable='Blue_detector',  # Adjusted path for the Python node
+            name='Blue_detector',
+            output='screen',
+            parameters=[{
+                # Add parameters here if needed
+            }],
+        ),
+        Node(
+            package='perception',
+            executable='White_detector',  # Adjusted path for the Python node
+            name='White_detector',
+            output='screen',
+            parameters=[{
+                # Add parameters here if needed
+            }],
         ),
     ])

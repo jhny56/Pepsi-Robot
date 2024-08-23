@@ -14,7 +14,7 @@ logger = logging.getLogger('blue_color_detector')
 
 class BlueColorDetector(Node):
     def __init__(self):
-        super().__init__('blue_color_detector')
+        super().__init__('Blue_detector')
         self.bridge = CvBridge()
 
         # Subscribers
@@ -66,7 +66,7 @@ class BlueColorDetector(Node):
         centroid = Point()
         centroid.x = x
         centroid.y = y
-        centroid.z = 0.0  
+        centroid.z = 0.0 
         self.centroid_pub.publish(centroid)
         logger.info(f"Published blue color centroid: ({x}, {y})")
 

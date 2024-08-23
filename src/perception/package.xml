@@ -3,30 +3,24 @@
 <package format="3">
   <name>perception</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="johnny-hanna@outlook.com">jhny56</maintainer>
+  <description>Package for color detection using ROS 2 and OpenCV</description>
+  <maintainer email="razanhmede@lau.edu">razanhmede</maintainer>
   <license>TODO: License declaration</license>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
-
-  <depend>rclcpp</depend>
   <depend>rclpy</depend>
   <depend>sensor_msgs</depend>
   <depend>cv_bridge</depend>
-  <depend>opencv4</depend> 
   <depend>geometry_msgs</depend>
   <depend>std_msgs</depend>
-  <exec_depend>python3</exec_depend>
-  <exec_depend>inference_sdk</exec_depend>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
-  <build_depend>ament_cmake_python</build_depend>
-  <exec_depend>ament_cmake_python</exec_depend>
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
+  <exec_depend>opencv-python</exec_depend> 
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
 
   <export>
-    <build_type>ament_cmake</build_type>
+    <build_type>ament_python</build_type>
   </export>
 </package>
-

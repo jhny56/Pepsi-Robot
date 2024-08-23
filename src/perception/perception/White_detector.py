@@ -10,7 +10,7 @@ import numpy as np
 
 class WhiteColorDetector(Node):
     def __init__(self):
-        super().__init__('white_color_detector')
+        super().__init__('white_detector')
         self.bridge = CvBridge()
         self.image_sub = self.create_subscription(Image, '/camera/image_raw', self.image_callback, 10)
 
