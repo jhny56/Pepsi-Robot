@@ -5,24 +5,29 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# find dependencies
+# Find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(OpenCV 4 REQUIRED)  
+find_package(geometry_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(ament_cmake_python REQUIRED)  # For Python support
 
-add_executable(initNode src/initNode.cpp)
-target_include_directories(initNode PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
-target_compile_features(initNode PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
-ament_target_dependencies(
-  initNode
-  "rclcpp"
-  "rclpy"
+# Install Python executables
+install(PROGRAMS
+  src/White_detector.py
+  src/Blue_detector.py
+  src/Blackband_detector.py
+  DESTINATION lib/${PROJECT_NAME}/nodes
 )
 
-install(TARGETS initNode
-  DESTINATION lib/${PROJECT_NAME})
+# Install other files (e.g., launch files)
+install(DIRECTORY launch/
+  DESTINATION share/${PROJECT_NAME}/launch
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -36,8 +41,6 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-install(DIRECTORY launch/
-  DESTINATION share/${PROJECT_NAME}/launch
-)
-
 ament_package()
+
+

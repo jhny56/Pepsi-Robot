@@ -17,10 +17,15 @@ COPY ./src/my_launch_package $ROS_WS/src/my_launch_package
 # Go back to workspace root
 WORKDIR $ROS_WS
 
-# Install dependencies (if you have any dependencies in your package.xml)
-# Uncomment and use rosdep if you have package dependencies
-# RUN apt-get update && rosdep update \
-#     && rosdep install --from-paths src --ignore-src -r -y
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    ros-galactic-cv-bridge \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements.txt and install Python dependencies
+COPY requirements.txt .
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Build the workspace
 RUN . /opt/ros/galactic/setup.sh && colcon build
