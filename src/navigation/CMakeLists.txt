@@ -9,6 +9,32 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(OpenCV REQUIRED)
+
+# Include directories
+include_directories(
+  include
+  ${OpenCV_INCLUDE_DIRS}
+)
+
+# Add executable
+add_executable(Qr_navigation_node src/Qr_navigation_node.cpp)
+
+# Link libraries
+ament_target_dependencies(Qr_navigation_node
+  rclcpp
+  sensor_msgs
+  geometry_msgs
+  cv_bridge
+  OpenCV
+)
+
+# Install targets
+install(TARGETS Qr_navigation_node
+  DESTINATION lib/${PROJECT_NAME})
 
 add_executable(initNode src/initNode.cpp)
 target_include_directories(initNode PUBLIC
