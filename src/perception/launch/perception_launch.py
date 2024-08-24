@@ -14,8 +14,8 @@ def generate_launch_description():
         ),
         Node(
             package='perception',
-            executable='Blue_detector',  # Adjusted path for the Python node
-            name='Blue_detector',
+            executable='pepsican_detector',  # Adjusted path for the Python node
+            name='pepsican_detector',
             output='screen',
             parameters=[{
                 # Add parameters here if needed
@@ -23,8 +23,8 @@ def generate_launch_description():
         ),
         Node(
             package='perception',
-            executable='White_detector',  # Adjusted path for the Python node
-            name='White_detector',
+            executable='qrcode_detector',  # Adjusted path for the Python node
+            name='qrcode_detector',
             output='screen',
             parameters=[{
                 # Add parameters here if needed
