@@ -45,6 +45,7 @@ class BlueColorDetector(Node):
 
             # Find contours of the blue areas
             contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+            center_x = float(mask.shape[1])/ 2 
 
             # If any blue contours are found, process the largest one
             if contours:
@@ -52,7 +53,7 @@ class BlueColorDetector(Node):
                 x, y, w, h = cv2.boundingRect(largest_contour)
                 centroid_x = x + w / 2
                 centroid_y = y + h / 2
-                self.publish_centroid(centroid_x, centroid_y)
+                self.publish_centroid(centroid_x, centroid_y,center_x)
                 self.publish_detection_status(True)
                 logger.info("Blue color detected!")
             else:
@@ -62,11 +63,11 @@ class BlueColorDetector(Node):
         except Exception as e:
             logger.error(f'Failed to process image: {e}')
 
-    def publish_centroid(self, x, y):
+    def publish_centroid(self, x, y,center_x):
         centroid = Point()
         centroid.x = x
         centroid.y = y
-        centroid.z = 0.0 
+        centroid.z = center_x
         self.centroid_pub.publish(centroid)
         logger.info(f"Published blue color centroid: ({x}, {y})")
 

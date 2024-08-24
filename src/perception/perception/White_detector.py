@@ -26,12 +26,12 @@ class WhiteColorDetector(Node):
             frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
 
             # Detect white color in the image
-            detected, centroid = self.detect_white_color(frame)
+            detected, centroid, center_x = self.detect_white_color(frame)
 
             if detected:
                 self.get_logger().info("White color detected!")
                 # Calculate and publish the centroid of the white color
-                self.publish_centroid(centroid)
+                self.publish_centroid(centroid,center_x)
             else:
                 self.get_logger().info("No white color detected.")
 
@@ -54,6 +54,7 @@ class WhiteColorDetector(Node):
 
         # Find contours of the detected white regions
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        center_x = float(mask.shape[1])/ 2 
 
         detected = False
         centroid = (0.0, 0.0)
@@ -70,13 +71,13 @@ class WhiteColorDetector(Node):
                 cy = int(moments['m01'] / moments['m00'])
                 centroid = (cx, cy)
 
-        return detected, centroid
+        return detected, centroid, center_x
 
-    def publish_centroid(self, centroid):
+    def publish_centroid(self, centroid,center_x):
         centroid_msg = Point()
-        centroid_msg.x = centroid[0]
-        centroid_msg.y = centroid[1]
-        centroid_msg.z = 0.0
+        centroid_msg.x = float(centroid[0])
+        centroid_msg.y = float(centroid[1])
+        centroid_msg.z = center_x
         self.centroid_pub.publish(centroid_msg)
         self.get_logger().info(f"Published white color centroid: ({centroid[0]}, {centroid[1]})")
 

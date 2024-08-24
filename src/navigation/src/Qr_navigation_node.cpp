@@ -6,7 +6,13 @@ QrNavigationNode::QrNavigationNode() : Node("Qr_navigation_node")
         "/camera/image_raw", 10, std::bind(&QrNavigationNode::imageCallback, this, std::placeholders::_1));
     scan_subscription_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
         "/scan", 10, std::bind(&QrNavigationNode::scanCallback, this, std::placeholders::_1));
-    
+    detection_subscription_ = this->create_subscription<std_msgs::msg::Bool>(
+        "/white_color_detection", 10,
+        std::bind(&QrNavigationNode::detectionCallback, this, std::placeholders::_1));
+    centroid_subscription_ = this->create_subscription<geometry_msgs::msg::Point>(
+        "/white_color_centroid", 10,
+        std::bind(&QrNavigationNode::centroidCallback, this, std::placeholders::_1));
+
     cmd_vel_publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
 
     declare_parameter("tolerance", 100);
@@ -33,60 +39,69 @@ QrNavigationNode::QrNavigationNode() : Node("Qr_navigation_node")
 void QrNavigationNode::scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg)
 {
     front_distance_ = msg->ranges[0];
-    
-    RCLCPP_INFO(this->get_logger(), "Front distance: %f", front_distance_);
+}
+
+void QrNavigationNode::detectionCallback(const std_msgs::msg::Bool::SharedPtr msg)
+{
+    objectDetected = msg->data;
+}
+
+void QrNavigationNode::centroidCallback(const geometry_msgs::msg::Point::SharedPtr msg)
+{
+    cx = msg->x;
+    center_x = msg->z;
 }
 
 void QrNavigationNode::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
 {
-    RCLCPP_INFO(this->get_logger(), "Image received");
+    // RCLCPP_INFO(this->get_logger(), "Image received");
 
-    cv_bridge::CvImagePtr cv_ptr;
-    try
-    {
-        cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-        RCLCPP_INFO(this->get_logger(), "Image converted to OpenCV format");
-    }
-    catch (cv_bridge::Exception& e)
-    {
-        RCLCPP_ERROR(this->get_logger(), "cv_bridge exception: %s", e.what());
-        return;
-    }
+    // cv_bridge::CvImagePtr cv_ptr;
+    // try
+    // {
+    //     cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+    //     // RCLCPP_INFO(this->get_logger(), "Image converted to OpenCV format");
+    // }
+    // catch (cv_bridge::Exception& e)
+    // {
+    //     RCLCPP_ERROR(this->get_logger(), "cv_bridge exception: %s", e.what());
+    //     return;
+    // }
 
-    cv::Mat hsv_image, mask;
-    cv::cvtColor(cv_ptr->image, hsv_image, cv::COLOR_BGR2HSV);
-    RCLCPP_INFO(this->get_logger(), "Image converted to HSV");
+    // cv::Mat hsv_image, mask;
+    // cv::cvtColor(cv_ptr->image, hsv_image, cv::COLOR_BGR2HSV);
+    // // RCLCPP_INFO(this->get_logger(), "Image converted to HSV");
 
-    // Define the range for detecting the blue color
-    cv::Scalar lower_blue(100, 150, 50);
-    cv::Scalar upper_blue(140, 255, 255);
-    cv::inRange(hsv_image, lower_blue, upper_blue, mask);
-    RCLCPP_INFO(this->get_logger(), "Thresholding complete, searching for contours");
+    // // Define the range for detecting the blue color
+    // cv::Scalar lower_blue(100, 150, 50);
+    // cv::Scalar upper_blue(140, 255, 255);
+    // cv::inRange(hsv_image, lower_blue, upper_blue, mask);
+    // // RCLCPP_INFO(this->get_logger(), "Thresholding complete, searching for contours");
 
-    // Find contours
-    std::vector<std::vector<cv::Point>> contours;
-    cv::findContours(mask, contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+    // // Find contours
+    // std::vector<std::vector<cv::Point>> contours;
+    // cv::findContours(mask, contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
     
     geometry_msgs::msg::Twist cmd_vel_msg;
 
-    if (contours.empty()) {
+    if (!objectDetected) {
         cmd_vel_msg.linear.x = 0;
         cmd_vel_msg.angular.z = max_angular_speed_; // turn right
 
         RCLCPP_WARN(this->get_logger(), "No contours found");
-        RCLCPP_INFO(this->get_logger(), "max_angular_speed_: %f", max_angular_speed_);
+        // RCLCPP_INFO(this->get_logger(), "max_angular_speed_: %f", max_angular_speed_);
 
     } else {
-        RCLCPP_INFO(this->get_logger(), "Found %lu contours", contours.size());
+        // RCLCPP_INFO(this->get_logger(), "Found %lu contours", contours.size());
 
-        // Calculate centroid and control logic
-        cv::Moments M = cv::moments(contours[0]);
-        int cx = int(M.m10 / M.m00);
-        int cy = int(M.m01 / M.m00);
+        // // Calculate centroid and control logic
+        // cv::Moments M = cv::moments(contours[0]);
+        // int cx = int(M.m10 / M.m00);
+        // int cy = int(M.m01 / M.m00);
 
-        RCLCPP_INFO(this->get_logger(), "Centroid of the largest contour: (%d, %d)", cx, cy);
+        // RCLCPP_INFO(this->get_logger(), "Centroid of the largest contour: (%d, %d)", cx, cy);
 
-        int center_x = mask.cols / 2;
+        // int center_x = mask.cols / 2;
         RCLCPP_INFO(this->get_logger(), "Center X: %d", center_x);
 
          // Add distance check from the laser scan data
@@ -97,15 +112,15 @@ void QrNavigationNode::imageCallback(const sensor_msgs::msg::Image::SharedPtr ms
 
 
         double linear_speed = 0;
-        RCLCPP_WARN(this->get_logger(), "Front Distance : %f",front_distance_);
+        // RCLCPP_WARN(this->get_logger(), "Front Distance : %f",front_distance_);
 
         if(front_distance_ > slow_down_threshold_){
-            RCLCPP_WARN(this->get_logger(), "Object close! Slowing Down.");
+            // RCLCPP_WARN(this->get_logger(), "Object close! Slowing Down.");
 
             linear_speed = max_linear_speed_;
 
         }else if(front_distance_ > stop_threshold_){
-            RCLCPP_WARN(this->get_logger(), "Object close! Slowing Down.");
+            // RCLCPP_WARN(this->get_logger(), "Object close! Slowing Down.");
 
             // Gradually decrease speed as the robot approaches the object
             double speed_factor = (front_distance_ - stop_threshold_) / (slow_down_threshold_ - stop_threshold_);
@@ -117,17 +132,17 @@ void QrNavigationNode::imageCallback(const sensor_msgs::msg::Image::SharedPtr ms
         }else{
             linear_speed= 0.0; // Stop if too close
             tolerance_ = 0;
-            RCLCPP_WARN(this->get_logger(), "Object too close! Stopping.");
+            // RCLCPP_WARN(this->get_logger(), "Object too close! Stopping.");
         }
 
         if (std::abs(error) < tolerance_) {
             cmd_vel_msg.linear.x = linear_speed; // Move forward
             cmd_vel_msg.angular.z = 0.0;
-            RCLCPP_INFO(this->get_logger(), "Centroid is near the center, moving forward");
+            // RCLCPP_INFO(this->get_logger(), "Centroid is near the center, moving forward");
         } else {
             cmd_vel_msg.linear.x = linear_speed;
             cmd_vel_msg.angular.z = angular_z;
-            RCLCPP_INFO(this->get_logger(), "Adjusting course: angular_z = %f", angular_z);
+            // RCLCPP_INFO(this->get_logger(), "Adjusting course: angular_z = %f", angular_z);
         }
 
     }
