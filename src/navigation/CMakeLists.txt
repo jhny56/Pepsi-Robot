@@ -65,6 +65,10 @@ endif()
 install(DIRECTORY launch/
   DESTINATION share/${PROJECT_NAME}/launch
 )
+# Install the params.yaml file
+install(FILES config/params.yaml
+  DESTINATION share/${PROJECT_NAME}/config
+)
 
 
 ament_package()
