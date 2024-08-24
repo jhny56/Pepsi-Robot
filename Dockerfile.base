@@ -10,10 +10,9 @@ ENV ROS_DOMAIN_ID=56
 RUN apt-get update && apt-get install -y \
     ros-galactic-rclcpp \
     ros-galactic-control-msgs \
+    ros-galactic-cv-bridge \
     python3-colcon-common-extensions \
     build-essential \
-    git \
-    vim \
     && rm -rf /var/lib/apt/lists/*
 
 # Set up environment sourcing

@@ -32,5 +32,5 @@ def generate_launch_description():
     return LaunchDescription([
         perception_launch,
         navigation_launch,
-        control_launch
+        # control_launch
     ])

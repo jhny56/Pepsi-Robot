@@ -1,10 +1,10 @@
 ros2 pkg create --build-type ament_cmake --node-name initNode control --dependencies rclcpp rclpy
 
 # To Build The Base Image (build once)
-docker build -f Dockerfile.base -t ros_galactic_with_deps .
+sudo docker build -f Dockerfile.base -t ros_galactic_with_deps .
 
 # To Build the custom image (takes less time)
-docker build -t my_ros2_application .
+sudo docker build -t my_ros2_application .
 
 # To Run the container
 sudo docker run --network host -it my_ros2_application 
