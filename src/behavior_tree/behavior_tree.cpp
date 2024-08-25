@@ -2,14 +2,22 @@
 #include <chrono>
 #include "behaviortree_cpp_v3/action_node.h"
 #include "behaviortree_cpp_v3/bt_factory.h"
+#include <rclcpp/rclcpp.hpp>
+#include <cstdlib>
+#include <stdexcept>
+
 
 using namespace std::chrono_literals;
 
 /*Can subtree*/
-BT::NodeStatus foundCan(){
-    bool found = false;   
-    if (found){
-        std::cout << "Can found" << std::endl;
+BT::NodeStatus foundCan(BT::TreeNode &self){
+    BT::Optional<bool> msg = self.getInput<bool>("canfound");
+    if(!msg){
+        throw BT::RuntimeError("No canfound message: ", msg.error());
+    }
+     
+    if (msg == true){
+        std::cout << "Can found" << std::endl;       
         return BT::NodeStatus::SUCCESS;        
     }
     std::cout << "Can not found" << std::endl;
@@ -19,16 +27,38 @@ BT::NodeStatus foundCan(){
 class SearchCan : public BT::SyncActionNode
 {
 public:
-    explicit SearchCan(const std::string &name) : BT::SyncActionNode(name, {})
-    {        
-    }    
+    explicit SearchCan(const std::string &name, const BT::NodeConfiguration &config)
+        : BT::SyncActionNode(name, config)
+    {
+    }
+
+    static BT::PortsList providedPorts(){
+        return {BT::BidirectionalPort<bool>("process_started")};
+    }
+
     BT::NodeStatus tick() override
     {
-        std::this_thread::sleep_for(3s);
-        std::cout<<"Successfully searched for can"<<std::endl;
+        BT::Optional<bool> msg = getInput<bool>("process_started");
+        if (msg == false) {
+            try {
+                // Start the Python node in the background
+                std::string command = "ros2 run perception Blue_detector &";
+                std::system(command.c_str());
+                
+                bool started = true;
+                BT::TreeNode::setOutput("process_started", started);
+            } catch (const std::exception &e) {
+                RCLCPP_ERROR(rclcpp::get_logger("SearchCan"), "Exception: %s", e.what());
+                return BT::NodeStatus::FAILURE;
+            }
+        }
+
+        // Indicate success immediately after starting the node
         return BT::NodeStatus::SUCCESS;
     }
 };
+
+
 
 BT::NodeStatus isAtCan(){
     bool atCan = false;   
@@ -43,16 +73,40 @@ BT::NodeStatus isAtCan(){
 class GoToCan : public BT::SyncActionNode
 {
 public:
-    explicit GoToCan(const std::string &name) : BT::SyncActionNode(name, {})
-    {        
-    }    
+    explicit GoToCan(const std::string &name, const BT::NodeConfiguration &config)
+        : BT::SyncActionNode(name, config) 
+    {
+    }
+
+    static BT::PortsList providedPorts(){
+        return {BT::BidirectionalPort<bool>("can_nav")};
+    }
+
     BT::NodeStatus tick() override
     {
-        std::this_thread::sleep_for(3s);
-        std::cout<<"Successfully went to can"<<std::endl;
+        BT::Optional<bool> msg = getInput<bool>("can_nav");
+        if (msg == false) {
+            try {
+                // Start the Python node
+                std::string command = "ros2 run navigation can_navigation_node";
+                int result = std::system(command.c_str());
+
+                if (result != 0) {
+                    throw std::runtime_error("Failed to start CAN NAVIGATION node.");
+                }
+                BT::TreeNode::setOutput("can_nav", true);
+            } catch (const std::exception &e) {
+                RCLCPP_ERROR(rclcpp::get_logger("GoToCan"), "Exception: %s", e.what());
+                return BT::NodeStatus::FAILURE;
+            }
+        }
+
+        // You can add additional logic here to check the status of the node if needed
         return BT::NodeStatus::SUCCESS;
     }
+
 };
+
 
 class Gripper : public BT::SyncActionNode
 {
@@ -69,26 +123,50 @@ public:
 };
 
 /*QR subtree*/
-BT::NodeStatus foundQr(){
-    bool foundQR = false;   
-    if (foundQR){
-        std::cout << "Robot found QR code" << std::endl;
+BT::NodeStatus foundQr(BT::TreeNode &self){
+    BT::Optional<bool> msg = self.getInput<bool>("QRfound");
+    if(!msg){
+        throw BT::RuntimeError("No QRfound message: ", msg.error());
+    }
+     
+    if (msg == true){
+        std::cout << "Robot found QR" << std::endl;       
         return BT::NodeStatus::SUCCESS;        
     }
-    std::cout << "Robot not found QR code." << std::endl;
+    std::cout << "Robot did not found QR" << std::endl;
     return BT::NodeStatus::FAILURE;
 }
 
 class SearchQr : public BT::SyncActionNode
 {
 public:
-    explicit SearchQr(const std::string &name) : BT::SyncActionNode(name, {})
-    {        
-    }    
+    explicit SearchQr(const std::string &name, const BT::NodeConfiguration &config)
+        : BT::SyncActionNode(name, config)
+    {
+    }
+
+    static BT::PortsList providedPorts(){
+        return {BT::BidirectionalPort<bool>("qr_process_started")};
+    }
+
     BT::NodeStatus tick() override
     {
-        std::this_thread::sleep_for(3s);
-        std::cout<<"Successfully searched for QR code"<<std::endl;
+        BT::Optional<bool> msg = getInput<bool>("qr_process_started");
+        if (msg == false) {
+            try {
+                // Start the Python node in the background
+                std::string command = "ros2 run perception White_detector &";
+                std::system(command.c_str());
+                
+                bool started = true;
+                BT::TreeNode::setOutput("qr_process_started", started);
+            } catch (const std::exception &e) {
+                RCLCPP_ERROR(rclcpp::get_logger("SearchQr"), "Exception: %s", e.what());
+                return BT::NodeStatus::FAILURE;
+            }
+        }
+
+        // Indicate success immediately after starting the node
         return BT::NodeStatus::SUCCESS;
     }
 };
@@ -106,39 +184,38 @@ BT::NodeStatus isAtQr(){
 class GoToQr : public BT::SyncActionNode
 {
 public:
-    explicit GoToQr(const std::string &name) : BT::SyncActionNode(name, {})
-    {        
-    }    
+    explicit GoToQr(const std::string &name, const BT::NodeConfiguration &config)
+        : BT::SyncActionNode(name, config) 
+    {
+    }
+
+    static BT::PortsList providedPorts(){
+        return {BT::BidirectionalPort<bool>("qr_nav")};
+    }
+
     BT::NodeStatus tick() override
     {
-        std::this_thread::sleep_for(3s);
-        std::cout<<"Successfully went to QR code"<<std::endl;
+        BT::Optional<bool> msg = getInput<bool>("qr_nav");
+        if (msg == false) {
+            try {
+                // Start the Python node
+                std::string command = "ros2 run navigation Qr_navigation_node";
+                int result = std::system(command.c_str());
+
+                if (result != 0) {
+                    throw std::runtime_error("Failed to start QR NAVIGATION node.");
+                }
+                BT::TreeNode::setOutput("qr_nav", true);
+            } catch (const std::exception &e) {
+                RCLCPP_ERROR(rclcpp::get_logger("GoToQr"), "Exception: %s", e.what());
+                return BT::NodeStatus::FAILURE;
+            }
+        }
+
+        // You can add additional logic here to check the status of the node if needed
         return BT::NodeStatus::SUCCESS;
     }
-};
 
-BT::NodeStatus isAtStrip(){
-    bool atStrip = false;   
-    if (atStrip){
-        std::cout << "Robot is at black strip" << std::endl;
-        return BT::NodeStatus::SUCCESS;        
-    }
-    std::cout << "Robot is not at black strip" << std::endl;
-    return BT::NodeStatus::FAILURE;
-}
-
-class GoToStrip : public BT::SyncActionNode
-{
-public:
-    explicit GoToStrip(const std::string &name) : BT::SyncActionNode(name, {})
-    {        
-    }    
-    BT::NodeStatus tick() override
-    {
-        std::this_thread::sleep_for(3s);
-        std::cout<<"Successfully went to black strip"<<std::endl;
-        return BT::NodeStatus::SUCCESS;
-    }
 };
 
 class GripperCancel : public BT::SyncActionNode
@@ -162,7 +239,8 @@ int main()
 
     //can subtree
 
-    factory.registerSimpleCondition("FoundCan", std::bind(foundCan));
+    BT::PortsList found_can_port = {BT::InputPort<bool>("canfound")};
+    factory.registerSimpleCondition("FoundCan",foundCan,found_can_port);
 
     factory.registerNodeType<SearchCan>("SearchCan");
 
@@ -174,7 +252,8 @@ int main()
 
     // QR subtree
 
-    factory.registerSimpleCondition("FoundQR", std::bind(foundQr));
+    BT::PortsList found_qr_port = {BT::InputPort<bool>("QRfound")};
+    factory.registerSimpleCondition("FoundQR", foundQr, found_qr_port);
 
     factory.registerNodeType<SearchQr>("SearchQR");  
 
@@ -182,17 +261,24 @@ int main()
 
     factory.registerNodeType<GoToQr>("GoToQR"); 
 
-    factory.registerSimpleCondition("IsAtStrip", std::bind(isAtStrip));
-
-    factory.registerNodeType<GoToStrip>("GoToStrip"); 
-
     factory.registerNodeType<GripperCancel>("GripperCancel");     
 
     //create Tree
     auto tree = factory.createTreeFromFile("./../behavior_tree.xml");
 
+    //Blackboard
+    tree.rootBlackboard()->set<bool>("canfound",false);
+    tree.rootBlackboard()->set<bool>("process_started",false);
+    tree.rootBlackboard()->set<bool>("can_nav",false);
+    tree.rootBlackboard()->set<bool>("QRfound",false);
+    tree.rootBlackboard()->set<bool>("qr_process_started",false);
+    tree.rootBlackboard()->set<bool>("qr_nav",false);
+    
     //execute the tree
-    tree.tickRoot();
+    //while(true){
+        tree.tickRoot();
+    //}
+    
     
     
 
