@@ -23,6 +23,7 @@ include_directories(
 
 # Add executable
 add_executable(Qr_navigation_node src/Qr_navigation_node.cpp)
+add_executable(can_navigation_node src/can_navigation_node.cpp)
 
 # Link libraries
 ament_target_dependencies(Qr_navigation_node
@@ -34,8 +35,20 @@ ament_target_dependencies(Qr_navigation_node
   std_msgs 
 )
 
+# Link libraries
+ament_target_dependencies(can_navigation_node
+  rclcpp
+  sensor_msgs
+  geometry_msgs
+  cv_bridge
+  OpenCV
+  std_msgs 
+)
+
 # Install targets
 install(TARGETS Qr_navigation_node
+  DESTINATION lib/${PROJECT_NAME})
+install(TARGETS can_navigation_node
   DESTINATION lib/${PROJECT_NAME})
 
 add_executable(initNode src/initNode.cpp)

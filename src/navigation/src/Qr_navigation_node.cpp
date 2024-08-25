@@ -12,6 +12,10 @@ QrNavigationNode::QrNavigationNode() : Node("Qr_navigation_node")
     centroid_subscription_ = this->create_subscription<geometry_msgs::msg::Point>(
         "/white_color_centroid", 10,
         std::bind(&QrNavigationNode::centroidCallback, this, std::placeholders::_1));
+    strip_subscription_ = this->create_subscription<std_msgs::msg::Bool>(
+        "/is_at_strip", 10,
+        std::bind(&QrNavigationNode::stripCallback, this, std::placeholders::_1));
+
 
     cmd_vel_publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
 
@@ -50,6 +54,11 @@ void QrNavigationNode::centroidCallback(const geometry_msgs::msg::Point::SharedP
 {
     cx = msg->x;
     center_x = msg->z;
+}
+
+void QrNavigationNode::stripCallback(const std_msgs::msg::Bool::SharedPtr msg)
+{
+    is_at_strip_ = msg->data;
 }
 
 void QrNavigationNode::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
@@ -114,25 +123,16 @@ void QrNavigationNode::imageCallback(const sensor_msgs::msg::Image::SharedPtr ms
         double linear_speed = 0;
         // RCLCPP_WARN(this->get_logger(), "Front Distance : %f",front_distance_);
 
-        if(front_distance_ > slow_down_threshold_){
+        if(!is_at_strip_){
             // RCLCPP_WARN(this->get_logger(), "Object close! Slowing Down.");
 
             linear_speed = max_linear_speed_;
 
-        }else if(front_distance_ > stop_threshold_){
-            // RCLCPP_WARN(this->get_logger(), "Object close! Slowing Down.");
-
-            // Gradually decrease speed as the robot approaches the object
-            double speed_factor = (front_distance_ - stop_threshold_) / (slow_down_threshold_ - stop_threshold_);
-            tolerance_ = 10;
-            speed_factor = std::max(0.1, std::min(1.0, speed_factor));
-            RCLCPP_WARN(this->get_logger(), "speed_factor: %f",speed_factor);
-
-            linear_speed= max_linear_speed_ * speed_factor;
         }else{
             linear_speed= 0.0; // Stop if too close
             tolerance_ = 0;
-            // RCLCPP_WARN(this->get_logger(), "Object too close! Stopping.");
+        
+            // HERE WE NEED TO STOP THE GRABBER ACTION AND TELL THE NODE THAT WE STOPPED
         }
 
         if (std::abs(error) < tolerance_) {
