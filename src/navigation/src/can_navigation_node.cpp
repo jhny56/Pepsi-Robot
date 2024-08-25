@@ -87,6 +87,7 @@ void CanNavigationNode::imageCallback(const sensor_msgs::msg::Image::SharedPtr m
             std_msgs::msg::Bool is_at_can_msg;
             is_at_can_msg.data = true;
             is_at_can_publisher_->publish(is_at_can_msg);
+            rclcpp::shutdown();
         }
 
         if (std::abs(error) < tolerance_) {
