@@ -26,6 +26,7 @@ class QRCodeDetector(Node):
         try:
             # Convert ROS Image message to OpenCV image
             frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+            frame_width = frame.shape[1]  
 
             # Detect and decode the QR code
             data, bbox, _ = self.qr_code_detector.detectAndDecode(frame)
@@ -37,10 +38,9 @@ class QRCodeDetector(Node):
                 self.get_logger().info(f"QR Code detected: {data}")
 
                 # Calculate and publish the centroid of the QR code
-                centroid = self.calculate_centroid(bbox)
+                centroid = self.calculate_centroid(bbox, frame_width)
                 self.publish_centroid(centroid)
                 self.draw_bbox(frame, bbox)
-
             else:
                 self.get_logger().info("No QR Code detected.")
 
@@ -59,22 +59,23 @@ class QRCodeDetector(Node):
                 point2 = tuple(bbox[(j + 1) % n][0])
                 cv2.line(frame, point1, point2, (255, 0, 0), 3)
 
-    def calculate_centroid(self, bbox):
+    def calculate_centroid(self, bbox, frame_width):
         # Calculate the centroid of the QR code
         if bbox is not None:
             points = np.array(bbox).reshape(-1, 2)
             x_center = np.mean(points[:, 0])
             y_center = np.mean(points[:, 1])
-            return (x_center, y_center)
-        return (0.0, 0.0)
+            center_x = frame_width / 2  
+            return (x_center, y_center, center_x)
+        return (0.0, 0.0, 0.0)
 
     def publish_centroid(self, centroid):
         centroid_msg = Point()
         centroid_msg.x = centroid[0]
         centroid_msg.y = centroid[1]
-        centroid_msg.z = 0.0  
+        centroid_msg.z = centroid[2]  
         self.centroid_pub.publish(centroid_msg)
-        self.get_logger().info(f"Published QR code centroid: ({centroid[0]}, {centroid[1]})")
+        self.get_logger().info(f"Published QR code centroid: ({centroid[0]}, {centroid[1]}), with center_x: {centroid[2]}")
 
     def publish_detection_status(self, detected):
         detection_status = Bool()
@@ -91,4 +92,5 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
+
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import rclpy
 from rclpy.node import Node
 import cv2
@@ -48,14 +47,14 @@ class PepsiCanDetector(Node):
             # Use the inference client to perform detection
             try:
                 result = self.client.infer(img_bytes, model_id=self.model_id)
-                self.process_detections(result)
+                self.process_detections(result, frame.shape[1])  
             except Exception as e:
                 logger.error(f"Error communicating with inference server: {e}")
 
         except Exception as e:
             logger.error(f'Failed to convert image: {e}')
 
-    def process_detections(self, result):
+    def process_detections(self, result, frame_width):
         logger.debug('Processing detections.')
         # Check if Pepsi can is detected and publish centroid and boolean
         detected = False
@@ -72,18 +71,19 @@ class PepsiCanDetector(Node):
 
                 centroid_x = (x_min + x_max) / 2
                 centroid_y = (y_min + y_max) / 2
-                self.publish_centroid(centroid_x, centroid_y)
+                center_x = frame_width / 2  
+                self.publish_centroid(centroid_x, centroid_y, center_x)
                 break
 
         self.publish_detection_status(detected)
 
-    def publish_centroid(self, x, y):
+    def publish_centroid(self, x, y, center_x):
         centroid = Point()
         centroid.x = x
         centroid.y = y
-        centroid.z = 0.0  
+        centroid.z = center_x  
         self.centroid_pub.publish(centroid)
-        logger.info(f"Published Pepsi can centroid: ({x}, {y})")
+        logger.info(f"Published Pepsi can centroid: ({x}, {y}), with center_x: {center_x}")
 
     def publish_detection_status(self, detected):
         detection_status = Bool()
@@ -100,4 +100,5 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
+
 
