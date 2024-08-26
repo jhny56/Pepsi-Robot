@@ -27,11 +27,11 @@ class BlueColorDetector(Node):
         logger.info('BlueColorDetector node has been started.')
 
     def image_callback(self, msg):
-        logger.debug('Received image message.')
+        # logger.debug('Received image message.')
         # Convert ROS Image message to OpenCV image
         try:
             frame = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
-            logger.debug('Converted image to OpenCV format.')
+            # logger.debug('Converted image to OpenCV format.')
 
             # Convert image to HSV color space for easier color detection
             hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -55,10 +55,10 @@ class BlueColorDetector(Node):
                 centroid_y = y + h / 2
                 self.publish_centroid(centroid_x, centroid_y,center_x)
                 self.publish_detection_status(True)
-                logger.info("Blue color detected!")
+                # logger.info("Blue color detected!")
             else:
                 self.publish_detection_status(False)
-                logger.info("Blue color not detected.")
+                # logger.info("Blue color not detected.")
 
         except Exception as e:
             logger.error(f'Failed to process image: {e}')
@@ -69,13 +69,13 @@ class BlueColorDetector(Node):
         centroid.y = y
         centroid.z = center_x
         self.centroid_pub.publish(centroid)
-        logger.info(f"Published blue color centroid: ({x}, {y})")
+        # logger.info(f"Published blue color centroid: ({x}, {y})")
 
     def publish_detection_status(self, detected):
         detection_status = Bool()
         detection_status.data = detected
         self.detection_pub.publish(detection_status)
-        logger.info(f"Published blue color detection status: {'Detected' if detected else 'Not Detected'}")
+        # logger.info(f"Published blue color detection status: {'Detected' if detected else 'Not Detected'}")
 
 def main(args=None):
     rclpy.init(args=args)

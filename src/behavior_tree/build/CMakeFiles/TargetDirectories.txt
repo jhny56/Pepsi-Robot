@@ -1,3 +1,0 @@
-/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/behavior_tree/build/CMakeFiles/GROUPRMJ-ROBOTICS-COMPETITION.dir
-/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/behavior_tree/build/CMakeFiles/edit_cache.dir
-/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/behavior_tree/build/CMakeFiles/rebuild_cache.dir

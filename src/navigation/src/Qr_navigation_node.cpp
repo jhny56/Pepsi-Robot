@@ -131,7 +131,9 @@ void QrNavigationNode::imageCallback(const sensor_msgs::msg::Image::SharedPtr ms
         }else{
             linear_speed= 0.0; // Stop if too close
             tolerance_ = 0;
-        
+
+
+            // rclcpp::shutdown();
             // HERE WE NEED TO STOP THE GRABBER ACTION AND TELL THE NODE THAT WE STOPPED
         }
 

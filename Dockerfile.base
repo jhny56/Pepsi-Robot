@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     ros-galactic-rclcpp \
     ros-galactic-control-msgs \
     ros-galactic-cv-bridge \
+    ros-galactic-behaviortree-cpp-v3 \
     python3 \
     python3-pip \
     python3-colcon-common-extensions \
@@ -23,7 +24,6 @@ RUN echo "source /opt/ros/galactic/setup.sh" >> /root/.bashrc
 # Copy requirements.txt and install Python dependencies
 COPY requirements.txt .
 RUN pip3 install --no-cache-dir -r requirements.txt
-
 
 # Create workspace directory
 WORKDIR $ROS_WS

@@ -29,11 +29,12 @@ class WhiteColorDetector(Node):
             detected, centroid, center_x = self.detect_white_color(frame)
 
             if detected:
-                self.get_logger().info("White color detected!")
+                # self.get_logger().info("White color detected!")
                 # Calculate and publish the centroid of the white color
                 self.publish_centroid(centroid,center_x)
             else:
-                self.get_logger().info("No white color detected.")
+                pass
+                # self.get_logger().info("No white color detected.")
 
             # Publish detection status
             self.publish_detection_status(detected)
@@ -79,13 +80,13 @@ class WhiteColorDetector(Node):
         centroid_msg.y = float(centroid[1])
         centroid_msg.z = center_x
         self.centroid_pub.publish(centroid_msg)
-        self.get_logger().info(f"Published white color centroid: ({centroid[0]}, {centroid[1]})")
+        # self.get_logger().info(f"Published white color centroid: ({centroid[0]}, {centroid[1]})")
 
     def publish_detection_status(self, detected):
         detection_status = Bool()
         detection_status.data = detected
         self.detection_pub.publish(detection_status)
-        self.get_logger().info(f"Published white color detection status: {'Detected' if detected else 'Not Detected'}")
+        # self.get_logger().info(f"Published white color detection status: {'Detected' if detected else 'Not Detected'}")
 
 def main(args=None):
     rclpy.init(args=args)
