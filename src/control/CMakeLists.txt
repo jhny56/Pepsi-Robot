@@ -12,6 +12,7 @@ find_package(rclpy REQUIRED)
 
 find_package(control_msgs REQUIRED)
 find_package(rclcpp_action REQUIRED)
+find_package(robot_hardware_interfaces REQUIRED)
 
 # Include directories
 include_directories(include)
@@ -22,7 +23,8 @@ add_executable(gripper_action_client src/gripper_action_client.cpp)
 
 # Link dependencies to the executable
 ament_target_dependencies(gripper_action_server rclcpp rclcpp_action control_msgs)
-ament_target_dependencies(gripper_action_client rclcpp rclcpp_action control_msgs)
+ament_target_dependencies(gripper_action_client rclcpp rclcpp_action control_msgs robot_hardware_interfaces)
+
 
 # Install the executable
 install(DIRECTORY launch/

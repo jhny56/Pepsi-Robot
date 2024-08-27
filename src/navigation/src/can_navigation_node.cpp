@@ -2,15 +2,14 @@
 
 CanNavigationNode::CanNavigationNode() : Node("can_navigation_node")
 {
-    image_subscription_ = this->create_subscription<sensor_msgs::msg::Image>(
-        "/camera/image_raw", 10, std::bind(&CanNavigationNode::imageCallback, this, std::placeholders::_1));
-    scan_subscription_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
-        "/scan", 10, std::bind(&CanNavigationNode::scanCallback, this, std::placeholders::_1));
+    
+    scan_subscription_ = this->create_subscription<std_msgs::msg::Float32>(
+        "/distanceToObstacle", 10, std::bind(&CanNavigationNode::scanCallback, this, std::placeholders::_1));
     detection_subscription_ = this->create_subscription<std_msgs::msg::Bool>(
-        "/blue_color_detection", 10,
+        "/pepsi_can_detection", 10,
         std::bind(&CanNavigationNode::detectionCallback, this, std::placeholders::_1));
     centroid_subscription_ = this->create_subscription<geometry_msgs::msg::Point>(
-        "/blue_color_centroid", 10,
+        "/pepsi_can_centroid", 10,
         std::bind(&CanNavigationNode::centroidCallback, this, std::placeholders::_1));
 
     cmd_vel_publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
@@ -37,9 +36,9 @@ CanNavigationNode::CanNavigationNode() : Node("can_navigation_node")
     }
 }
 
-void CanNavigationNode::scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg)
+void CanNavigationNode::scanCallback(const std_msgs::msg::Float32::SharedPtr msg)
 {
-    front_distance_ = msg->ranges[0];
+    front_distance_ = msg->data; //TODO
 }
 
 void CanNavigationNode::detectionCallback(const std_msgs::msg::Bool::SharedPtr msg)
@@ -51,10 +50,7 @@ void CanNavigationNode::centroidCallback(const geometry_msgs::msg::Point::Shared
 {
     cx = msg->x;
     center_x = msg->z;
-}
 
-void CanNavigationNode::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
-{
     geometry_msgs::msg::Twist cmd_vel_msg;
 
     if (!objectDetected) {
@@ -100,6 +96,7 @@ void CanNavigationNode::imageCallback(const sensor_msgs::msg::Image::SharedPtr m
     }
     cmd_vel_publisher_->publish(cmd_vel_msg);
 }
+
 
 int main(int argc, char *argv[])
 {

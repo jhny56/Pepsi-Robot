@@ -42,7 +42,7 @@ public:
         if (msg == false) {
             try {
                 // Start the Python node in the background
-                std::string command = "ros2 run perception Blue_detector &";
+                std::string command = "ros2 run perception pepsican_detector &";
                 std::system(command.c_str());
                 
                 bool started = true;
@@ -155,7 +155,7 @@ public:
         if (msg == false) {
             try {
                 // Start the Python node in the background
-                std::string command = "ros2 run perception White_detector &";
+                std::string command = "ros2 run perception qrcode_detector &";
                 std::system(command.c_str());
                 
                 bool started = true;

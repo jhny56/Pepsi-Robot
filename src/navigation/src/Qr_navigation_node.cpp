@@ -2,18 +2,15 @@
 
 QrNavigationNode::QrNavigationNode() : Node("Qr_navigation_node")
 {
-    image_subscription_ = this->create_subscription<sensor_msgs::msg::Image>(
-        "/camera/image_raw", 10, std::bind(&QrNavigationNode::imageCallback, this, std::placeholders::_1));
-    scan_subscription_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
-        "/scan", 10, std::bind(&QrNavigationNode::scanCallback, this, std::placeholders::_1));
+   
     detection_subscription_ = this->create_subscription<std_msgs::msg::Bool>(
-        "/white_color_detection", 10,
+        "/qr_code_detection", 10,
         std::bind(&QrNavigationNode::detectionCallback, this, std::placeholders::_1));
     centroid_subscription_ = this->create_subscription<geometry_msgs::msg::Point>(
-        "/white_color_centroid", 10,
+        "/qr_code_centroid", 10,
         std::bind(&QrNavigationNode::centroidCallback, this, std::placeholders::_1));
-    strip_subscription_ = this->create_subscription<std_msgs::msg::Bool>(
-        "/is_at_strip", 10,
+    strip_subscription_ = this->create_subscription<std_msgs::msg::Int8>(
+        "/lineDetectionData", 10,
         std::bind(&QrNavigationNode::stripCallback, this, std::placeholders::_1));
 
 
@@ -54,43 +51,7 @@ void QrNavigationNode::centroidCallback(const geometry_msgs::msg::Point::SharedP
 {
     cx = msg->x;
     center_x = msg->z;
-}
 
-void QrNavigationNode::stripCallback(const std_msgs::msg::Bool::SharedPtr msg)
-{
-    is_at_strip_ = msg->data;
-}
-
-void QrNavigationNode::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
-{
-    // RCLCPP_INFO(this->get_logger(), "Image received");
-
-    // cv_bridge::CvImagePtr cv_ptr;
-    // try
-    // {
-    //     cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-    //     // RCLCPP_INFO(this->get_logger(), "Image converted to OpenCV format");
-    // }
-    // catch (cv_bridge::Exception& e)
-    // {
-    //     RCLCPP_ERROR(this->get_logger(), "cv_bridge exception: %s", e.what());
-    //     return;
-    // }
-
-    // cv::Mat hsv_image, mask;
-    // cv::cvtColor(cv_ptr->image, hsv_image, cv::COLOR_BGR2HSV);
-    // // RCLCPP_INFO(this->get_logger(), "Image converted to HSV");
-
-    // // Define the range for detecting the blue color
-    // cv::Scalar lower_blue(100, 150, 50);
-    // cv::Scalar upper_blue(140, 255, 255);
-    // cv::inRange(hsv_image, lower_blue, upper_blue, mask);
-    // // RCLCPP_INFO(this->get_logger(), "Thresholding complete, searching for contours");
-
-    // // Find contours
-    // std::vector<std::vector<cv::Point>> contours;
-    // cv::findContours(mask, contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
-    
     geometry_msgs::msg::Twist cmd_vel_msg;
 
     if (!objectDetected) {
@@ -150,6 +111,19 @@ void QrNavigationNode::imageCallback(const sensor_msgs::msg::Image::SharedPtr ms
     }
     cmd_vel_publisher_->publish(cmd_vel_msg);
 }
+
+void QrNavigationNode::stripCallback(const std_msgs::msg::Int8::SharedPtr msg)
+{
+    is_at_strip_ = msg->data;
+     // Convert the integer value to a binary string
+    std::bitset<32> binary_value(msg->data);
+
+    // Now, binary_value is a std::bitset which can be used to get the binary representation
+    // For example, to print the binary representation:
+    RCLCPP_INFO(this->get_logger(), "Binary value: %s", binary_value.to_string().c_str());
+}
+
+
 
 int main(int argc, char *argv[])
 {

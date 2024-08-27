@@ -18,7 +18,7 @@ class PepsiCanDetector(Node):
         self.bridge = CvBridge()
 
         # Subscribers
-        self.image_sub = self.create_subscription(Image, 'image_publisher', self.image_callback, 10)
+        self.image_sub = self.create_subscription(Image, '/robot_interfaces/compressed', self.image_callback, 10)
 
         # Publishers
         self.centroid_pub = self.create_publisher(Point, '/pepsi_can_centroid', 10)

@@ -12,7 +12,7 @@ class QRCodeDetector(Node):
     def __init__(self):
         super().__init__('qr_code_detector')
         self.bridge = CvBridge()
-        self.image_sub = self.create_subscription(Image, '/camera/image_raw', self.image_callback, 10)
+        self.image_sub = self.create_subscription(Image, '/robot_interfaces/compressed', self.image_callback, 10)
 
         # Initialize publishers
         self.centroid_pub = self.create_publisher(Point, '/qr_code_centroid', 10)

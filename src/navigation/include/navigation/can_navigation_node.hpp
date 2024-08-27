@@ -9,6 +9,7 @@
 #include <sensor_msgs/msg/laser_scan.hpp>
 #include "std_msgs/msg/bool.hpp"
 #include "geometry_msgs/msg/point.hpp"
+#include "std_msgs/msg/float32.hpp"
 
 class CanNavigationNode : public rclcpp::Node
 {
@@ -16,14 +17,12 @@ public:
     CanNavigationNode();
 
 private:
-    void imageCallback(const sensor_msgs::msg::Image::SharedPtr msg);
-    void scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg);
+    void scanCallback(const std_msgs::msg::Float32::SharedPtr msg);
     void detectionCallback(const std_msgs::msg::Bool::SharedPtr msg);
     void centroidCallback(const geometry_msgs::msg::Point::SharedPtr msg);
 
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr detection_subscription_;
-    rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_subscription_;
-    rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_subscription_;
+    rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr scan_subscription_;
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_publisher_;
     rclcpp::Subscription<geometry_msgs::msg::Point>::SharedPtr centroid_subscription_;
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr is_at_can_publisher_;
