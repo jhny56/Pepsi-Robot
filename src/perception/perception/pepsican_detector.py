@@ -6,7 +6,9 @@ from sensor_msgs.msg import Image
 from geometry_msgs.msg import Point
 from std_msgs.msg import Bool
 from cv_bridge import CvBridge
-from inference_sdk import InferenceHTTPClient
+import torch
+import os
+import numpy as np
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
@@ -24,12 +26,11 @@ class PepsiCanDetector(Node):
         self.centroid_pub = self.create_publisher(Point, '/pepsi_can_centroid', 10)
         self.detection_pub = self.create_publisher(Bool, '/pepsi_can_detection', 10)
 
-        # Initialize the InferenceHTTPClient
-        self.client = InferenceHTTPClient(
-            api_url="https://detect.roboflow.com",
-            api_key="bwZdRPnoYYRFnrcscwxp"  
-        )
-        self.model_id = "pepsi-can-detection-krjyn/1"
+        # Load the trained model
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        weights_path = os.path.join(current_dir, '..', 'weights', 'weightspepsican.pt')
+        self.model = torch.load(weights_path)
+        self.model.eval()
 
         # Initialize frame counter
         self.frame_counter = 0
@@ -54,68 +55,50 @@ class PepsiCanDetector(Node):
             frame = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
             logger.debug('Converted image to OpenCV format.')
 
-            # Convert image to JPEG format
-            _, img_encoded = cv2.imencode('.jpg', frame)
-            img_bytes = img_encoded.tobytes()
+            # Preprocess the image for the model
+            input_image = self.preprocess_image(frame)
 
-            # Use the inference client to perform detection
-            try:
-                result = self.client.infer(frame, model_id=self.model_id)
-                self.process_detections(result, frame.shape[1])  
-            except Exception as e:
-                logger.error(f"Error communicating with inference server: {e}")
+            # Perform detection using the loaded model
+            result = self.model(input_image)
+
+            # Post-process the detections
+            self.process_detections(result, frame.shape[1])
 
         except Exception as e:
-            logger.error(f'Failed to convert image: {e}')
+            logger.error(f'Failed to process image: {e}')
+
+    def preprocess_image(self, frame):
+        # Resize, normalize, and convert image to the format your model expects
+        input_image = cv2.resize(frame, (640, 640))  # Example resize, adjust as needed
+        input_image = cv2.cvtColor(input_image, cv2.COLOR_BGR2RGB)
+        input_image = input_image.transpose(2, 0, 1)  # Convert HxWxC to CxHxW
+        input_image = input_image / 255.0  # Normalize pixel values to [0, 1]
+        input_image = torch.tensor(input_image, dtype=torch.float32).unsqueeze(0)  # Add batch dimension
+        return input_image
 
     def process_detections(self, result, frame_width):
         logger.debug('Processing detections.')
         # Check if Pepsi can is detected and publish centroid and boolean
         detected = False
-        print('RESULT : ')
-        my_class = ''
-        detection = ''
-        print(result)
-        if result['predictions']:
-            my_class = result['predictions'][0]['class']
-            detection = result['predictions'][0]
-        
 
-        
-        print("my class : ", my_class)
-        print("my detection : ", detection)
+        # Assuming result contains bounding box and class data
+        if result is not None and len(result.xyxy[0]) > 0:
+            for detection in result.xyxy[0]:  # Adjust indexing as per your model's output format
+                if detection[-1] == "pepsi":  # Assuming last element is the class label
+                    logger.info("Pepsi can detected!")
+                    detected = True
 
-        if my_class == "pepsi":
-            logger.info("Pepsi can detected!")
-            detected = True
+                    # Calculate the centroid of the detected Pepsi can
+                    x_min = detection[0].item()
+                    y_min = detection[1].item()
+                    x_max = detection[2].item()
+                    y_max = detection[3].item()
 
-            # Calculate the centroid of the detected Pepsi can
-            x_min = detection['x'] - detection['width'] / 2
-            y_min = detection['y'] - detection['height'] / 2
-            x_max = detection['x'] + detection['width'] / 2
-            y_max = detection['y'] + detection['height'] / 2
-
-            centroid_x = (x_min + x_max) / 2
-            centroid_y = (y_min + y_max) / 2
-            center_x = frame_width / 2  
-            self.publish_centroid(centroid_x, centroid_y, center_x)
-        
-        # for detection in result.get('predictions', []):
-        #     if detection['class'] == 'pepsi':
-        #         logger.info("Pepsi can detected!")
-        #         detected = True
-
-        #         # Calculate the centroid of the detected Pepsi can
-        #         x_min = detection['x'] - detection['width'] / 2
-        #         y_min = detection['y'] - detection['height'] / 2
-        #         x_max = detection['x'] + detection['width'] / 2
-        #         y_max = detection['y'] + detection['height'] / 2
-
-        #         centroid_x = (x_min + x_max) / 2
-        #         centroid_y = (y_min + y_max) / 2
-        #         center_x = frame_width / 2  
-        #         self.publish_centroid(centroid_x, centroid_y, center_x)
-        #         break
+                    centroid_x = (x_min + x_max) / 2
+                    centroid_y = (y_min + y_max) / 2
+                    center_x = frame_width / 2  
+                    self.publish_centroid(centroid_x, centroid_y, center_x)
+                    break
 
         self.publish_detection_status(detected)
 
@@ -142,5 +125,6 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
+
 
 
