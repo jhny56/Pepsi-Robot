@@ -1,3 +1,6 @@
+numpy>=1.20.0
 requests
 opencv-python-headless
 inference-sdk
+roboflow
+supervision

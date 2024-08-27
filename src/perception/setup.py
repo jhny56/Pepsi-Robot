@@ -22,8 +22,8 @@ setup(
     entry_points={
         'console_scripts': [
             'Blackband_detector = perception.Blackband_detector:main',
-            'Blue_detector = perception.Blue_detector :main',
-            'White_detector = perception.White_detector:main',
+            'pepsican_detector = perception.pepsican_detector :main',
+            'qrcode_detector = perception.qrcode_detector:main',
         ],
     },
 )
