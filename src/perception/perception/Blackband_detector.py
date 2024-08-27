@@ -1,65 +1,35 @@
 #!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
-import cv2
-from sensor_msgs.msg import Image
-from std_msgs.msg import Bool
-from cv_bridge import CvBridge
-import numpy as np
+from std_msgs.msg import Float32, Bool
 
 class BlackBandDetector(Node):
     def __init__(self):
-        super().__init__('blackband_detector')
-        self.bridge = CvBridge()
-        self.image_sub = self.create_subscription(Image, '/camera/image_raw', self.image_callback, 10)
+        super().__init__('black_band_detector')
+
+        # Subscriber to the light sensor topic
+        self.sensor_sub = self.create_subscription(Float32, '/light_sensor', self.sensor_callback, 10)
+        
         # Publisher for black band detection
         self.band_pub = self.create_publisher(Bool, '/black_band_detected', 10)
-        self.get_logger().info('BlackBandDetector node has been started.')
+        
+        self.black_band_detected = False
+        self.threshold = 0.2  # Threshold for detecting a black band
 
-    def image_callback(self, msg):
-        try:
-            # Convert ROS Image message to OpenCV image
-            frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+    def sensor_callback(self, msg):
+        light_intensity = msg.data
 
-            # Detect black band in the image
-            detected = self.detect_black_band(frame)
-
-            if detected:
+        # Check if the detected light intensity corresponds to a black band
+        if light_intensity < self.threshold:
+            if not self.black_band_detected:
                 self.get_logger().info("Black band detected!")
-            else:
-                self.get_logger().info("No black band detected.")
-
-            # Publish detection status
-            self.publish_detection(detected)
-
-        except Exception as e:
-            self.get_logger().error(f'Error processing image: {e}')
-
-    def detect_black_band(self, frame):
-        # Convert the image to HSV color space
-        hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
-        # Define the range for black color in HSV
-        lower_black = np.array([0, 0, 0])
-        upper_black = np.array([180, 255, 50])
-
-        # Create a mask for black color
-        mask = cv2.inRange(hsv_frame, lower_black, upper_black)
-
-        # Find contours of the detected black regions
-        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-        detected = False
-
-        if contours:
-            # Check if any contours have a significant area
-            for contour in contours:
-                area = cv2.contourArea(contour)
-                if area > 100: 
-                    detected = True
-                    break
-
-        return detected
+                self.black_band_detected = True
+                self.publish_detection(True)
+        else:
+            if self.black_band_detected:
+                self.get_logger().info("Black band no longer detected!")
+                self.black_band_detected = False
+                self.publish_detection(False)
 
     def publish_detection(self, detected):
         detection_msg = Bool()
@@ -76,3 +46,4 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
+
