@@ -14,7 +14,7 @@ class ImagePublisher(Node):
 
     def publish_image(self):
         # Read the image from the file
-        img = cv2.imread('image.jpg')
+        img = cv2.imread('pepsican.jpg')
 
         if img is not None:
             self.get_logger().info('Publishing image...')

@@ -30,4 +30,14 @@ def generate_launch_description():
                 # Add parameters here if needed
             }],
         ),
+        Node(
+            package='perception',
+            executable='imagepublisher',  # Adjusted path for the Python node
+            name='imagepublisher',
+            output='screen',
+            parameters=[{
+                # Add parameters here if needed
+            }],
+        ),
+
     ])
