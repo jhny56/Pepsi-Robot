@@ -42,7 +42,9 @@ public:
         if (msg == false) {
             try {
                 // Start the Python node in the background
-                std::string command = "ros2 run perception Blue_detector &";
+                // return BT::NodeStatus::SUCCESS; 
+
+                std::string command = "ros2 run perception pepsican_detector &";
                 std::system(command.c_str());
                 
                 bool started = true;
@@ -88,6 +90,8 @@ public:
         if (msg == false) {
             try {
                 // Start the Python node
+                // return BT::NodeStatus::SUCCESS; 
+
                 std::string command = "ros2 run navigation can_navigation_node";
                 int result = std::system(command.c_str());
 
@@ -155,7 +159,7 @@ public:
         if (msg == false) {
             try {
                 // Start the Python node in the background
-                std::string command = "ros2 run perception White_detector &";
+                std::string command = "ros2 run perception qrcode_detector &";
                 std::system(command.c_str());
                 
                 bool started = true;

@@ -7,10 +7,10 @@ QrNavigationNode::QrNavigationNode() : Node("Qr_navigation_node")
     scan_subscription_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
         "/scan", 10, std::bind(&QrNavigationNode::scanCallback, this, std::placeholders::_1));
     detection_subscription_ = this->create_subscription<std_msgs::msg::Bool>(
-        "/white_color_detection", 10,
+        "/qr_code_detection", 10,
         std::bind(&QrNavigationNode::detectionCallback, this, std::placeholders::_1));
     centroid_subscription_ = this->create_subscription<geometry_msgs::msg::Point>(
-        "/white_color_centroid", 10,
+        "/qr_code_centroid", 10,
         std::bind(&QrNavigationNode::centroidCallback, this, std::placeholders::_1));
     strip_subscription_ = this->create_subscription<std_msgs::msg::Bool>(
         "/is_at_strip", 10,

@@ -18,7 +18,7 @@ class PepsiCanDetector(Node):
         self.bridge = CvBridge()
 
         # Subscribers
-        self.image_sub = self.create_subscription(Image, 'image_publisher', self.image_callback, 10)
+        self.image_sub = self.create_subscription(Image, '/camera/image_raw', self.image_callback, 10)
 
         # Publishers
         self.centroid_pub = self.create_publisher(Point, '/pepsi_can_centroid', 10)
@@ -31,10 +31,24 @@ class PepsiCanDetector(Node):
         )
         self.model_id = "pepsi-can-detection-krjyn/1"
 
+        # Initialize frame counter
+        self.frame_counter = 0
+        
+        # Set the frame skip interval
+        self.frame_skip_interval = 7  # Adjust this value to control frequency
+
         logger.info('PepsiCanDetector node has been started.')
 
     def image_callback(self, msg):
         logger.debug('Received image message.')
+         # Update frame counter
+        self.frame_counter += 1
+
+        # Process only every Nth frame
+        if self.frame_counter % self.frame_skip_interval != 0:
+            logger.debug('Skipping inference for this frame.')
+            return
+
         # Convert ROS Image message to OpenCV image
         try:
             frame = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
@@ -46,7 +60,7 @@ class PepsiCanDetector(Node):
 
             # Use the inference client to perform detection
             try:
-                result = self.client.infer(img_bytes, model_id=self.model_id)
+                result = self.client.infer(frame, model_id=self.model_id)
                 self.process_detections(result, frame.shape[1])  
             except Exception as e:
                 logger.error(f"Error communicating with inference server: {e}")
@@ -58,22 +72,50 @@ class PepsiCanDetector(Node):
         logger.debug('Processing detections.')
         # Check if Pepsi can is detected and publish centroid and boolean
         detected = False
-        for detection in result.get('predictions', []):
-            if detection['class'] == 'pepsi':
-                logger.info("Pepsi can detected!")
-                detected = True
+        print('RESULT : ')
+        my_class = ''
+        detection = ''
+        print(result)
+        if result['predictions']:
+            my_class = result['predictions'][0]['class']
+            detection = result['predictions'][0]
+        
 
-                # Calculate the centroid of the detected Pepsi can
-                x_min = detection['x'] - detection['width'] / 2
-                y_min = detection['y'] - detection['height'] / 2
-                x_max = detection['x'] + detection['width'] / 2
-                y_max = detection['y'] + detection['height'] / 2
+        
+        print("my class : ", my_class)
+        print("my detection : ", detection)
 
-                centroid_x = (x_min + x_max) / 2
-                centroid_y = (y_min + y_max) / 2
-                center_x = frame_width / 2  
-                self.publish_centroid(centroid_x, centroid_y, center_x)
-                break
+        if my_class == "pepsi":
+            logger.info("Pepsi can detected!")
+            detected = True
+
+            # Calculate the centroid of the detected Pepsi can
+            x_min = detection['x'] - detection['width'] / 2
+            y_min = detection['y'] - detection['height'] / 2
+            x_max = detection['x'] + detection['width'] / 2
+            y_max = detection['y'] + detection['height'] / 2
+
+            centroid_x = (x_min + x_max) / 2
+            centroid_y = (y_min + y_max) / 2
+            center_x = frame_width / 2  
+            self.publish_centroid(centroid_x, centroid_y, center_x)
+        
+        # for detection in result.get('predictions', []):
+        #     if detection['class'] == 'pepsi':
+        #         logger.info("Pepsi can detected!")
+        #         detected = True
+
+        #         # Calculate the centroid of the detected Pepsi can
+        #         x_min = detection['x'] - detection['width'] / 2
+        #         y_min = detection['y'] - detection['height'] / 2
+        #         x_max = detection['x'] + detection['width'] / 2
+        #         y_max = detection['y'] + detection['height'] / 2
+
+        #         centroid_x = (x_min + x_max) / 2
+        #         centroid_y = (y_min + y_max) / 2
+        #         center_x = frame_width / 2  
+        #         self.publish_centroid(centroid_x, centroid_y, center_x)
+        #         break
 
         self.publish_detection_status(detected)
 

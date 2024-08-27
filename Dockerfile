@@ -30,5 +30,7 @@ RUN . /opt/ros/galactic/setup.sh && mkdir -p build && cd build && rm -rf CMakeCa
 WORKDIR $ROS_WS
 RUN echo "source /ros2_ws/install/setup.bash" >> /root/.bashrc
 
+
+
 # Set the default command to run when the container starts
 CMD ["bash", "-c", "source /opt/ros/galactic/setup.bash && source /ros2_ws/install/setup.bash && cd /ros2_ws/src/behavior_tree/build && ./GROUPRMJ-ROBOTICS-COMPETITION"]

@@ -33,8 +33,8 @@ private:
     double stop_threshold_ = 0.7;
     double slow_down_threshold_ = 2.0;
     double angular_scaling_factor_ = 0.0005;
-    double max_linear_speed_ = 0.5;
-    double max_angular_speed_ = 0.7;
+    double max_linear_speed_ = 0.2;
+    double max_angular_speed_ = 0.2;
     bool objectDetected = false;
 
     float cx = 0;

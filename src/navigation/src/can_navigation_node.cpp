@@ -7,10 +7,10 @@ CanNavigationNode::CanNavigationNode() : Node("can_navigation_node")
     scan_subscription_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
         "/scan", 10, std::bind(&CanNavigationNode::scanCallback, this, std::placeholders::_1));
     detection_subscription_ = this->create_subscription<std_msgs::msg::Bool>(
-        "/blue_color_detection", 10,
+        "/pepsi_can_detection", 10,
         std::bind(&CanNavigationNode::detectionCallback, this, std::placeholders::_1));
     centroid_subscription_ = this->create_subscription<geometry_msgs::msg::Point>(
-        "/blue_color_centroid", 10,
+        "/pepsi_can_centroid", 10,
         std::bind(&CanNavigationNode::centroidCallback, this, std::placeholders::_1));
 
     cmd_vel_publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
