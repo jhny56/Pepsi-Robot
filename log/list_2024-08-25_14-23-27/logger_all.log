@@ -1,0 +1,93 @@
+[0.129s] DEBUG:colcon:Command line arguments: ['/usr/bin/colcon', 'list', '-p', '--base-paths', '/home/mohamad/Inmind/GroupRMJ-Robotics-Competition']
+[0.129s] DEBUG:colcon:Parsed command line arguments: Namespace(log_base=None, log_level=None, verb_name='list', build_base='build', ignore_user_meta=False, metas=['./colcon.meta'], base_paths=['/home/mohamad/Inmind/GroupRMJ-Robotics-Competition'], packages_ignore=None, packages_ignore_regex=None, paths=None, packages_up_to=None, packages_up_to_regex=None, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_select_by_dep=None, packages_skip_by_dep=None, packages_skip_up_to=None, packages_select_build_failed=False, packages_skip_build_finished=False, packages_select_test_failures=False, packages_skip_test_passed=False, packages_select=None, packages_skip=None, packages_select_regex=None, packages_skip_regex=None, packages_start=None, packages_end=None, allow_overriding=[], topological_order=False, names_only=False, paths_only=True, topological_graph=False, topological_graph_dot=False, topological_graph_density=False, topological_graph_legend=False, topological_graph_dot_cluster=False, topological_graph_dot_include_skipped=False, verb_parser=<colcon_defaults.argument_parser.defaults.DefaultArgumentsDecorator object at 0x7ef12f555030>, verb_extension=<colcon_package_information.verb.list.ListVerb object at 0x7ef12f65d450>, main=<bound method ListVerb.main of <colcon_package_information.verb.list.ListVerb object at 0x7ef12f65d450>>)
+[0.425s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) check parameters
+[0.425s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) check parameters
+[0.425s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) check parameters
+[0.425s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) check parameters
+[0.425s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) discover
+[0.425s] INFO:colcon.colcon_core.package_discovery:Crawling recursively for packages in '/home/mohamad/Inmind/GroupRMJ-Robotics-Competition'
+[0.425s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition) by extensions ['ignore', 'ignore_ament_install']
+[0.425s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition) by extension 'ignore'
+[0.425s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition) by extension 'ignore_ament_install'
+[0.425s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition) by extensions ['colcon_pkg']
+[0.425s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition) by extension 'colcon_pkg'
+[0.425s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition) by extensions ['colcon_meta']
+[0.425s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition) by extension 'colcon_meta'
+[0.425s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition) by extensions ['ros']
+[0.425s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition) by extension 'ros'
+[0.447s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition) by extensions ['cmake', 'python']
+[0.447s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition) by extension 'cmake'
+[0.447s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition) by extension 'python'
+[0.447s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition) by extensions ['python_setup_py']
+[0.447s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition) by extension 'python_setup_py'
+[0.447s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/log) by extensions ['ignore', 'ignore_ament_install']
+[0.448s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/log) by extension 'ignore'
+[0.448s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/log) ignored
+[0.448s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src) by extensions ['ignore', 'ignore_ament_install']
+[0.448s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src) by extension 'ignore'
+[0.448s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src) by extension 'ignore_ament_install'
+[0.448s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src) by extensions ['colcon_pkg']
+[0.448s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src) by extension 'colcon_pkg'
+[0.448s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src) by extensions ['colcon_meta']
+[0.448s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src) by extension 'colcon_meta'
+[0.448s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src) by extensions ['ros']
+[0.448s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src) by extension 'ros'
+[0.449s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src) by extensions ['cmake', 'python']
+[0.449s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src) by extension 'cmake'
+[0.449s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src) by extension 'python'
+[0.449s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src) by extensions ['python_setup_py']
+[0.449s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src) by extension 'python_setup_py'
+[0.449s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/behavior_tree) by extensions ['ignore', 'ignore_ament_install']
+[0.449s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/behavior_tree) by extension 'ignore'
+[0.449s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/behavior_tree) by extension 'ignore_ament_install'
+[0.450s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/behavior_tree) by extensions ['colcon_pkg']
+[0.450s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/behavior_tree) by extension 'colcon_pkg'
+[0.450s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/behavior_tree) by extensions ['colcon_meta']
+[0.450s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/behavior_tree) by extension 'colcon_meta'
+[0.450s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/behavior_tree) by extensions ['ros']
+[0.450s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/behavior_tree) by extension 'ros'
+[0.450s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/behavior_tree) by extensions ['cmake', 'python']
+[0.450s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/behavior_tree) by extension 'cmake'
+[0.456s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/behavior_tree) by extension 'python'
+[0.456s] DEBUG:colcon.colcon_core.package_identification:Package '/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/behavior_tree' with type 'cmake' and name 'GROUPRMJ-ROBOTICS-COMPETITION'
+[0.456s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/control) by extensions ['ignore', 'ignore_ament_install']
+[0.456s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/control) by extension 'ignore'
+[0.456s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/control) by extension 'ignore_ament_install'
+[0.456s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/control) by extensions ['colcon_pkg']
+[0.456s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/control) by extension 'colcon_pkg'
+[0.456s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/control) by extensions ['colcon_meta']
+[0.456s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/control) by extension 'colcon_meta'
+[0.457s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/control) by extensions ['ros']
+[0.457s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/control) by extension 'ros'
+[0.460s] DEBUG:colcon.colcon_core.package_identification:Package '/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/control' with type 'ros.ament_cmake' and name 'control'
+[0.461s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/my_launch_package) by extensions ['ignore', 'ignore_ament_install']
+[0.461s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/my_launch_package) by extension 'ignore'
+[0.461s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/my_launch_package) by extension 'ignore_ament_install'
+[0.461s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/my_launch_package) by extensions ['colcon_pkg']
+[0.461s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/my_launch_package) by extension 'colcon_pkg'
+[0.461s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/my_launch_package) by extensions ['colcon_meta']
+[0.461s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/my_launch_package) by extension 'colcon_meta'
+[0.461s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/my_launch_package) by extensions ['ros']
+[0.461s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/my_launch_package) by extension 'ros'
+[0.461s] DEBUG:colcon.colcon_core.package_identification:Package '/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/my_launch_package' with type 'ros.ament_cmake' and name 'my_launch_package'
+[0.462s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/navigation) by extensions ['ignore', 'ignore_ament_install']
+[0.462s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/navigation) by extension 'ignore'
+[0.462s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/navigation) by extension 'ignore_ament_install'
+[0.462s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/navigation) by extensions ['colcon_pkg']
+[0.462s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/navigation) by extension 'colcon_pkg'
+[0.462s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/navigation) by extensions ['colcon_meta']
+[0.462s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/navigation) by extension 'colcon_meta'
+[0.462s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/navigation) by extensions ['ros']
+[0.462s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/navigation) by extension 'ros'
+[0.466s] DEBUG:colcon.colcon_core.package_identification:Package '/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/navigation' with type 'ros.ament_cmake' and name 'navigation'
+[0.466s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/perception) by extensions ['ignore', 'ignore_ament_install']
+[0.467s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/perception) by extension 'ignore'
+[0.467s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/perception) by extension 'ignore_ament_install'
+[0.467s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/perception) by extensions ['colcon_pkg']
+[0.467s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/perception) by extension 'colcon_pkg'
+[0.467s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/perception) by extensions ['colcon_meta']
+[0.467s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/perception) by extension 'colcon_meta'
+[0.467s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/perception) by extensions ['ros']
+[0.467s] Level 1:colcon.colcon_core.package_identification:_identify(/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/perception) by extension 'ros'
+[0.468s] DEBUG:colcon.colcon_core.package_identification:Package '/home/mohamad/Inmind/GroupRMJ-Robotics-Competition/src/perception' with type 'ros.ament_python' and name 'perception'
+[0.468s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) using defaults

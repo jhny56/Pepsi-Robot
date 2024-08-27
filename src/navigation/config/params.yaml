@@ -1,0 +1,16 @@
+Qr_navigation_node:
+  ros__parameters:
+    tolerance: 100
+    stop_threshold: 0.3
+    slow_down_threshold: 2.0
+    angular_scaling_factor: 0.0005
+    max_linear_speed: 0.5
+    max_angular_speed: 0.7
+can_navigation_node:
+  ros__parameters:
+    tolerance: 100
+    stop_threshold: 0.3
+    slow_down_threshold: 2.0
+    angular_scaling_factor: 0.0005
+    max_linear_speed: 0.5
+    max_angular_speed: 0.7
