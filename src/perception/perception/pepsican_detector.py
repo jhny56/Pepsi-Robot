@@ -7,7 +7,6 @@ from geometry_msgs.msg import Point
 from std_msgs.msg import Bool
 from cv_bridge import CvBridge
 from ultralytics import YOLO
-import torch
 import logging
 import numpy as np
 
@@ -27,7 +26,7 @@ class PepsiCanDetector(Node):
         self.detection_pub = self.create_publisher(Bool, '/pepsi_can_detection', 10)
 
         # Load the trained model from the same directory as the script
-        self.model = YOLO("/home/razanhmede/Downloads/best.pt")
+        self.model = YOLO("/ros2_ws/weights.pt",task='detect')
         self.target_x = None
 
         logger.info('PepsiCanDetector node has been started.')
