@@ -5,7 +5,6 @@
 #include <rclcpp/rclcpp.hpp>
 #include <cstdlib>
 #include <stdexcept>
-#include "control/gripper_action_client.hpp"
 
 using namespace std::chrono_literals;
 
@@ -108,54 +107,28 @@ public:
 };
 
 
-class Gripper : public BT::StatefulActionNode
+class Gripper : public BT::SyncActionNode
 {
 public:
     explicit Gripper(const std::string &name)
-        : BT::StatefulActionNode(name, {}), 
-          node_(std::make_shared<GripperActionClient>()), goal_active_(false) 
+        : BT::SyncActionNode(name, {})
     {
-        rclcpp::spin_some(node_);
     }
 
-    BT::NodeStatus onStart() override
+    BT::NodeStatus tick() override
     {
-        // Start the action client by sending the goal
-        node_->send_goal();
-        goal_active_ = true;
+            try {
+                // Start the Python node in the background
+                std::string command = "ros2 run control gripper_action_client &";
+                std::system(command.c_str());
+            } catch (const std::exception &e) {
+                RCLCPP_ERROR(rclcpp::get_logger("Gripper"), "Exception: %s", e.what());
+                return BT::NodeStatus::FAILURE;
+            }
 
-        // Process any immediate ROS callbacks
-        rclcpp::spin_some(node_);
-
-        // Indicate that the action is running
-        return BT::NodeStatus::RUNNING;
+        // Indicate success immediately after starting the node
+        return BT::NodeStatus::SUCCESS;
     }
-
-    BT::NodeStatus onRunning() override
-    {
-        // Keep spinning to handle ROS callbacks
-        rclcpp::spin_some(node_);
-
-        // Check if the goal is still active
-        if (!goal_active_)
-        {
-            // If the goal is no longer active, determine success or failure
-            return BT::NodeStatus::SUCCESS;
-        }
-
-        // Otherwise, keep running
-        return BT::NodeStatus::RUNNING;
-    }
-
-    void onHalted() override
-    {
-        // Handle any necessary cleanup if the action is halted
-        goal_active_ = false;
-    }
-
-private:
-    std::shared_ptr<GripperActionClient> node_;
-    bool goal_active_;
 };
 
 /*QR subtree*/

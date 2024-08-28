@@ -23,27 +23,29 @@ include_directories(
 add_executable(gripper_action_server src/gripper_action_server_main.cpp src/gripper_action_server.cpp)
 ament_target_dependencies(gripper_action_server rclcpp rclcpp_action control_msgs)
 
-# Create a library for the gripper action client
-add_library(gripper_action_client_library SHARED src/gripper_action_client.cpp)
-target_include_directories(gripper_action_client_library PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
-)
-ament_target_dependencies(gripper_action_client_library rclcpp rclcpp_action control_msgs robot_hardware_interfaces)
+# Add the executable for the action client
+add_executable(gripper_action_client src/gripper_action_client.cpp)
+ament_target_dependencies(gripper_action_client rclcpp rclcpp_action control_msgs robot_hardware_interfaces)
 
-# Install the gripper action client library
-install(TARGETS gripper_action_client_library
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-)
+# Create a library for the gripper action client (if needed, otherwise remove this)
+# add_library(gripper_action_client_library SHARED src/gripper_action_client.cpp)
+# target_include_directories(gripper_action_client_library PUBLIC
+#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#   $<INSTALL_INTERFACE:include>
+# )
+# ament_target_dependencies(gripper_action_client_library rclcpp rclcpp_action control_msgs robot_hardware_interfaces)
 
 # Install the executable for the action server
 install(TARGETS gripper_action_server
   DESTINATION lib/${PROJECT_NAME}
 )
 
-# Add the executable for initNode
+# Install the executable for the action client
+install(TARGETS gripper_action_client
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+# Install the executable for initNode
 add_executable(initNode src/initNode.cpp)
 target_include_directories(initNode PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
