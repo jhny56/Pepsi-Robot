@@ -16,7 +16,8 @@ COPY ./src/control $ROS_WS/src/control
 COPY ./src/my_launch_package $ROS_WS/src/my_launch_package
 COPY ./src/behavior_tree $ROS_WS/src/behavior_tree
 COPY ./src/robot_hardware_interfaces $ROS_WS/src/robot_hardware_interfaces
-
+# Copy the weights file into the Docker image
+COPY weights.pt /ros2_ws/weights.pt 
 
 # Go back to workspace root
 WORKDIR $ROS_WS
