@@ -6,7 +6,6 @@
 #include <cstdlib>
 #include <stdexcept>
 
-
 using namespace std::chrono_literals;
 
 /*Can subtree*/
@@ -111,13 +110,23 @@ public:
 class Gripper : public BT::SyncActionNode
 {
 public:
-    explicit Gripper(const std::string &name) : BT::SyncActionNode(name, {})
-    {        
-    }    
+    explicit Gripper(const std::string &name)
+        : BT::SyncActionNode(name, {})
+    {
+    }
+
     BT::NodeStatus tick() override
     {
-        std::this_thread::sleep_for(3s);
-        std::cout<<"Successfully closed gripper"<<std::endl;
+            try {
+                // Start the Python node in the background
+                std::string command = "ros2 run control gripper_action_client &";
+                std::system(command.c_str());
+            } catch (const std::exception &e) {
+                RCLCPP_ERROR(rclcpp::get_logger("Gripper"), "Exception: %s", e.what());
+                return BT::NodeStatus::FAILURE;
+            }
+
+        // Indicate success immediately after starting the node
         return BT::NodeStatus::SUCCESS;
     }
 };
