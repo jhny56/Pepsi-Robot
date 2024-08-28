@@ -7,8 +7,6 @@ from geometry_msgs.msg import Point
 from std_msgs.msg import Bool
 from cv_bridge import CvBridge
 import torch
-import os
-import numpy as np
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
@@ -26,11 +24,18 @@ class PepsiCanDetector(Node):
         self.centroid_pub = self.create_publisher(Point, '/pepsi_can_centroid', 10)
         self.detection_pub = self.create_publisher(Bool, '/pepsi_can_detection', 10)
 
-        # Load the trained model
-        current_dir = os.path.dirname(os.path.realpath(__file__))
-        weights_path = os.path.join(current_dir, '..', 'weights', 'weightspepsican.pt')
-        self.model = torch.load(weights_path)
-        self.model.eval()
+        # Load the trained model from the same directory as the script
+        try:
+            weights_path = 'weightspepsican.pt'
+            self.model = torch.load(weights_path)
+            self.model.eval()
+            logger.info('Model loaded successfully from weightspepsican.pt')
+        except FileNotFoundError as e:
+            logger.error(f"Failed to load weights: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Unexpected error loading model: {e}")
+            raise
 
         # Initialize frame counter
         self.frame_counter = 0
@@ -42,7 +47,8 @@ class PepsiCanDetector(Node):
 
     def image_callback(self, msg):
         logger.debug('Received image message.')
-         # Update frame counter
+        
+        # Update frame counter
         self.frame_counter += 1
 
         # Process only every Nth frame
@@ -125,6 +131,8 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
+
+
 
 
 
