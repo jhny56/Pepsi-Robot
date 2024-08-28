@@ -5,7 +5,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <cstdlib>
 #include <stdexcept>
-
+#include "control/gripper_action_client.hpp"
 
 using namespace std::chrono_literals;
 
@@ -108,18 +108,54 @@ public:
 };
 
 
-class Gripper : public BT::SyncActionNode
+class Gripper : public BT::StatefulActionNode
 {
 public:
-    explicit Gripper(const std::string &name) : BT::SyncActionNode(name, {})
-    {        
-    }    
-    BT::NodeStatus tick() override
+    explicit Gripper(const std::string &name)
+        : BT::StatefulActionNode(name, {}), 
+          node_(std::make_shared<GripperActionClient>()), goal_active_(false) 
     {
-        std::this_thread::sleep_for(3s);
-        std::cout<<"Successfully closed gripper"<<std::endl;
-        return BT::NodeStatus::SUCCESS;
+        rclcpp::spin_some(node_);
     }
+
+    BT::NodeStatus onStart() override
+    {
+        // Start the action client by sending the goal
+        node_->send_goal();
+        goal_active_ = true;
+
+        // Process any immediate ROS callbacks
+        rclcpp::spin_some(node_);
+
+        // Indicate that the action is running
+        return BT::NodeStatus::RUNNING;
+    }
+
+    BT::NodeStatus onRunning() override
+    {
+        // Keep spinning to handle ROS callbacks
+        rclcpp::spin_some(node_);
+
+        // Check if the goal is still active
+        if (!goal_active_)
+        {
+            // If the goal is no longer active, determine success or failure
+            return BT::NodeStatus::SUCCESS;
+        }
+
+        // Otherwise, keep running
+        return BT::NodeStatus::RUNNING;
+    }
+
+    void onHalted() override
+    {
+        // Handle any necessary cleanup if the action is halted
+        goal_active_ = false;
+    }
+
+private:
+    std::shared_ptr<GripperActionClient> node_;
+    bool goal_active_;
 };
 
 /*QR subtree*/
