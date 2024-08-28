@@ -1,5 +1,5 @@
 # Use the custom base image created earlier
-FROM ros_galactic_base
+FROM ros_galactic_with_deps
 
 # Set environment variables
 ENV ROS_WS=/ros2_ws
@@ -7,6 +7,7 @@ ENV ROS_DOMAIN_ID=56
 
 # Copy requirements.txt and install Python dependencies
 COPY requirements.txt .
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
+
 
 # This image will have all the base dependencies plus the Python packages installed
