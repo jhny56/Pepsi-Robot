@@ -42,10 +42,6 @@ QrNavigationNode::QrNavigationNode() : Node("Qr_navigation_node")
     timer_ = this->create_wall_timer(100ms, std::bind(&QrNavigationNode::timerCallback, this));
 }
 
-void QrNavigationNode::scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg)
-{
-    front_distance_ = msg->ranges[0];
-}
 
 void QrNavigationNode::detectionCallback(const std_msgs::msg::Bool::SharedPtr msg)
 {
@@ -66,11 +62,11 @@ void QrNavigationNode::stripCallback(const std_msgs::msg::Int8::SharedPtr msg)
     std::bitset<5> binary_value(msg->data);
 
     // Assign each bit to a corresponding sensor variable
-    sensor1 = binary_value[0];  // First sensor (least significant bit)
-    sensor2 = binary_value[1];  // Second sensor
-    sensor3 = binary_value[2];  // Third sensor
-    sensor4 = binary_value[3];  // Fourth sensor
-    sensor5 = binary_value[4];  // Fifth sensor (most significant bit)
+    sensor1 = binary_value[0]; 
+    sensor2 = binary_value[1];  
+    sensor3 = binary_value[2];  
+    sensor4 = binary_value[3];  
+    sensor5 = binary_value[4];  
 
     // Log the binary value and the individual sensor states
     RCLCPP_INFO(this->get_logger(), "Binary value: %s", binary_value.to_string().c_str());
@@ -104,10 +100,11 @@ void QrNavigationNode::timerCallback()
             linear_speed = max_linear_speed_;
 
         }else{
-            linear_speed= 0.0; // Stop if too close
-            tolerance_ = 0;
 
-            // rclcpp::shutdown();
+            cmd_vel_msg.linear.x = 0.0;
+            cmd_vel_msg.angular.z = 0.0;
+            cmd_vel_publisher_->publish(cmd_vel_msg);
+            rclcpp::shutdown();
             // HERE WE NEED TO STOP THE GRABBER ACTION AND TELL THE NODE THAT WE STOPPED
         }
 

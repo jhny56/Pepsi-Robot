@@ -29,11 +29,7 @@ void GripperActionClient::send_goal()
 
   this->goal_handle_future_ = this->client_->async_send_goal(goal_msg, send_goal_options);
 
-  // Set a timer to cancel the goal after 30 seconds
-  this->cancel_timer_ = this->create_wall_timer(
-    std::chrono::seconds(30),
-    std::bind(&GripperActionClient::cancel_goal, this)
-  );
+
 }
 
 void GripperActionClient::goal_response_callback(GoalHandleGripperAction::SharedPtr goal_handle)

@@ -18,8 +18,6 @@ public:
     QrNavigationNode();
 
 private:
-    void imageCallback(const sensor_msgs::msg::Image::SharedPtr msg);
-    void scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg);
     void detectionCallback(const std_msgs::msg::Bool::SharedPtr msg);
     void centroidCallback(const geometry_msgs::msg::Point::SharedPtr msg);
     void stripCallback(const std_msgs::msg::Int8::SharedPtr msg);
