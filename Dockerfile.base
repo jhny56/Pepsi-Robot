@@ -21,10 +21,6 @@ RUN apt-get update && apt-get install -y \
 # Set up environment sourcing
 RUN echo "source /opt/ros/galactic/setup.sh" >> /root/.bashrc
 
-# Copy requirements.txt and install Python dependencies
-COPY requirements.txt .
-RUN pip3 install --no-cache-dir -r requirements.txt
-
 # Create workspace directory
 WORKDIR $ROS_WS
 
