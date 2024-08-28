@@ -30,9 +30,9 @@ class QRCodeDetector(Node):
 
             # Detect and decode the QR code
             data, bbox, _ = self.qr_code_detector.detectAndDecode(frame)
-
+            print(bbox)
             detected = False
-            if bbox is not None and data:
+            if bbox is not None and len(bbox) > 0:
                 # If a QR code was detected and successfully decoded
                 detected = True
                 self.get_logger().info(f"QR Code detected: {data}")
@@ -53,19 +53,20 @@ class QRCodeDetector(Node):
     def draw_bbox(self, frame, bbox):
         if bbox is not None:
             # Draw bounding box around the detected QR code
-            n = len(bbox)
+            n = len(bbox[0])
             for j in range(n):
-                point1 = tuple(bbox[j][0])
-                point2 = tuple(bbox[(j + 1) % n][0])
+                # Convert points to integer tuples
+                point1 = tuple(int(v) for v in bbox[0][j])
+                point2 = tuple(int(v) for v in bbox[0][(j + 1) % n])
                 cv2.line(frame, point1, point2, (255, 0, 0), 3)
 
     def calculate_centroid(self, bbox, frame_width):
         # Calculate the centroid of the QR code
         if bbox is not None:
             points = np.array(bbox).reshape(-1, 2)
-            x_center = np.mean(points[:, 0])
-            y_center = np.mean(points[:, 1])
-            center_x = frame_width / 2  
+            x_center =  float(np.mean(points[:, 0]))
+            y_center =  float(np.mean(points[:, 1]))
+            center_x =  float(frame_width / 2)
             return (x_center, y_center, center_x)
         return (0.0, 0.0, 0.0)
 
