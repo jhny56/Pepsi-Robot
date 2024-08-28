@@ -2,7 +2,7 @@
 import rclpy
 from rclpy.node import Node
 import cv2
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import CompressedImage, Image
 from geometry_msgs.msg import Point
 from std_msgs.msg import Bool
 from cv_bridge import CvBridge
@@ -12,7 +12,7 @@ class QRCodeDetector(Node):
     def __init__(self):
         super().__init__('qr_code_detector')
         self.bridge = CvBridge()
-        self.image_sub = self.create_subscription(Image, '/robot_interfaces/compressed', self.image_callback, 10)
+        self.image_sub = self.create_subscription(CompressedImage, '/robot_interfaces/compressed', self.image_callback, 10)
 
         # Initialize publishers
         self.centroid_pub = self.create_publisher(Point, '/qr_code_centroid', 10)
@@ -24,9 +24,10 @@ class QRCodeDetector(Node):
 
     def image_callback(self, msg):
         try:
-            # Convert ROS Image message to OpenCV image
-            frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
-            frame_width = frame.shape[1]  
+            # Convert ROS CompressedImage message to OpenCV image
+            np_arr = np.frombuffer(msg.data, np.uint8)
+            frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+            frame_width = frame.shape[1]
 
             # Detect and decode the QR code
             data, bbox, _ = self.qr_code_detector.detectAndDecode(frame)
@@ -93,5 +94,6 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
+
 
 
