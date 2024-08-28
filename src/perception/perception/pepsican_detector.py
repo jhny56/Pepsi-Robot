@@ -6,7 +6,7 @@ from sensor_msgs.msg import Image
 from geometry_msgs.msg import Point
 from std_msgs.msg import Bool
 from cv_bridge import CvBridge
-from ultralytics import YOLO
+from ultralytics import YOLO # type: ignore
 import logging
 import numpy as np
 
@@ -33,20 +33,28 @@ class PepsiCanDetector(Node):
     def image_callback(self, msg):
         try:
             # Convert ROS Image message to OpenCV image
-            np_arr = np.frombuffer(msg.data, np.uint8)
-            cv_image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+            cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+            # np_arr = np.frombuffer(msg.data, np.uint8)
+            # cv_image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+            print("CV IMAGE : ",cv_image)
+            cv_image_rgb = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
 
             # Perform detection using the loaded model
             results = self.model.predict(source=cv_image, conf=0.25, iou=0.45)
+            # Perform detection using the loaded model
             result = results[0]  # Get the first result
+            annotated_image = result.plot()
+
+            print(result.boxes)
 
             detected = False
             centroid_x = None
             centroid_y = None
             center_x = None
-            if len(result.boxes.xyxy) > 0:
+
+            if result.boxes.xyxy.shape[0] > 0:
                 # Assuming only one box per detection
-                box = result.boxes.xyxy[0].cpu().numpy()
+                box = result.boxes.xyxy[0]
                 xmin, ymin, xmax, ymax = box
 
                 # Calculate centroid coordinates
@@ -63,14 +71,17 @@ class PepsiCanDetector(Node):
                 self.publish_centroid(centroid_x, centroid_y, center_x)
             self.publish_detection_status(detected)
 
+            cv2.imwrite("/ros2_ws/detected_pepsi.jpg", annotated_image)
+
+
         except Exception as e:
             logger.error(f'Failed to process image: {e}')
 
     def publish_centroid(self, x, y, center_x):
         centroid = Point()
-        centroid.x = x
-        centroid.y = y
-        centroid.z = center_x
+        centroid.x = float(x)
+        centroid.y = float(y)
+        centroid.z = float(center_x)
         self.centroid_pub.publish(centroid)
         logger.info(f"Published Pepsi can centroid: ({x}, {y}) with center_x: {center_x}")
 
