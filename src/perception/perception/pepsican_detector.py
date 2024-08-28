@@ -25,9 +25,8 @@ class PepsiCanDetector(Node):
         self.centroid_pub = self.create_publisher(Point, '/pepsi_can_centroid', 10)
         self.detection_pub = self.create_publisher(Bool, '/pepsi_can_detection', 10)
 
-        # Load the trained model from the same directory as the script
-        self.model = YOLO("/ros2_ws/weights.pt",task='detect')
-        self.target_x = None
+        # Load the trained model from the specified path
+        self.model = YOLO("/ros2_ws/weights.pt", task='detect')
 
         logger.info('PepsiCanDetector node has been started.')
 
@@ -42,32 +41,38 @@ class PepsiCanDetector(Node):
             result = results[0]  # Get the first result
 
             detected = False
+            centroid_x = None
+            centroid_y = None
             center_x = None
             if len(result.boxes.xyxy) > 0:
                 # Assuming only one box per detection
                 box = result.boxes.xyxy[0].cpu().numpy()
                 xmin, ymin, xmax, ymax = box
-                self.target_x = (xmin + xmax) / 2
-                center_x = (xmin + xmax) / 2
+
+                # Calculate centroid coordinates
+                centroid_x = (xmin + xmax) / 2
+                centroid_y = (ymin + ymax) / 2
+
+                frame_width, frame_height = cv_image.shape[1], cv_image.shape[0]
+                center_x = frame_width / 2
+
                 detected = True
-            else:
-                self.target_x = None
 
             # Publish results
-            self.publish_centroid(self.target_x, ymin, center_x) if detected else None
+            if detected:
+                self.publish_centroid(centroid_x, centroid_y, center_x)
             self.publish_detection_status(detected)
 
         except Exception as e:
             logger.error(f'Failed to process image: {e}')
 
-
     def publish_centroid(self, x, y, center_x):
         centroid = Point()
         centroid.x = x
         centroid.y = y
-        centroid.z = center_x  
+        centroid.z = center_x
         self.centroid_pub.publish(centroid)
-        logger.info(f"Published Pepsi can centroid: ({x}, {y}), with center_x: {center_x}")
+        logger.info(f"Published Pepsi can centroid: ({x}, {y}) with center_x: {center_x}")
 
     def publish_detection_status(self, detected):
         detection_status = Bool()
@@ -84,8 +89,4 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
-
-
-
-
 
