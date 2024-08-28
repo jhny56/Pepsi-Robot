@@ -2,12 +2,13 @@
 import rclpy
 from rclpy.node import Node
 import cv2
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import CompressedImage, Image
 from geometry_msgs.msg import Point
 from std_msgs.msg import Bool
 from cv_bridge import CvBridge
-from inference_sdk import InferenceHTTPClient
+from ultralytics import YOLO 
 import logging
+import numpy as np
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('pepsi_can_detector')
@@ -18,92 +19,68 @@ class PepsiCanDetector(Node):
         self.bridge = CvBridge()
 
         # Subscribers
-        self.image_sub = self.create_subscription(Image, '/robot_interfaces/compressed', self.image_callback, 10)
+        self.image_sub = self.create_subscription(CompressedImage, '/robot_interfaces/compressed', self.image_callback, 10)
 
         # Publishers
         self.centroid_pub = self.create_publisher(Point, '/pepsi_can_centroid', 10)
         self.detection_pub = self.create_publisher(Bool, '/pepsi_can_detection', 10)
 
-        # Initialize the InferenceHTTPClient
-        self.client = InferenceHTTPClient(
-            api_url="https://detect.roboflow.com",
-            api_key="bwZdRPnoYYRFnrcscwxp"  
-        )
-        self.model_id = "pepsi-can-detection-krjyn/1"
-
-        # Initialize frame counter
-        self.frame_counter = 0
-        
-        # Set the frame skip interval
-        self.frame_skip_interval = 7  # Adjust this value to control frequency
+        # Load the trained model from the specified path
+        self.model = YOLO("/ros2_ws/weights.pt", task='detect')
 
         logger.info('PepsiCanDetector node has been started.')
 
     def image_callback(self, msg):
-        logger.debug('Received image message.')
-         # Update frame counter
-        self.frame_counter += 1
-
-        # Process only every Nth frame
-        if self.frame_counter % self.frame_skip_interval != 0:
-            logger.debug('Skipping inference for this frame.')
-            return
-
-        # Convert ROS Image message to OpenCV image
         try:
-            frame = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
-            logger.debug('Converted image to OpenCV format.')
+            # Convert ROS CompressedImage message to a raw OpenCV image
+            np_arr = np.frombuffer(msg.data, np.uint8)
+            cv_image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+            
+            # Convert BGR image to RGB for the model
+            cv_image_rgb = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
 
-            # Convert image to JPEG format
-            _, img_encoded = cv2.imencode('.jpg', frame)
-            img_bytes = img_encoded.tobytes()
+            # Perform detection using the loaded model
+            results = self.model.predict(source=cv_image_rgb, conf=0.25, iou=0.45)
+            result = results[0]  
+            annotated_image = result.plot()
 
-            # Use the inference client to perform detection
-            try:
-                result = self.client.infer(frame, model_id=self.model_id)
-                self.process_detections(result, frame.shape[1])  
-            except Exception as e:
-                logger.error(f"Error communicating with inference server: {e}")
+            detected = False
+            centroid_x = None
+            centroid_y = None
+            center_x = None
+
+            if result.boxes.xyxy.shape[0] > 0:
+                
+                box = result.boxes.xyxy[0]
+                xmin, ymin, xmax, ymax = box
+
+                # Calculate centroid coordinates
+                centroid_x = (xmin + xmax) / 2
+                centroid_y = (ymin + ymax) / 2
+
+                frame_width, frame_height = cv_image.shape[1], cv_image.shape[0]
+                center_x = frame_width / 2
+
+                detected = True
+
+            
+            if detected:
+                self.publish_centroid(centroid_x, centroid_y, center_x)
+            self.publish_detection_status(detected)
+
+            
+            cv2.imwrite("/ros2_ws/detected_pepsi.jpg", annotated_image)
 
         except Exception as e:
-            logger.error(f'Failed to convert image: {e}')
-
-    def process_detections(self, result, frame_width):
-        logger.debug('Processing detections.')
-        # Check if Pepsi can is detected and publish centroid and boolean
-        detected = False
-        print('RESULT : ')
-        my_class = ''
-        detection = ''
-        print(result)
-        if result['predictions']:
-            my_class = result['predictions'][0]['class']
-            detection = result['predictions'][0]
-
-        if my_class == "pepsi":
-            logger.info("Pepsi can detected!")
-            detected = True
-
-            # Calculate the centroid of the detected Pepsi can
-            x_min = detection['x'] - detection['width'] / 2
-            y_min = detection['y'] - detection['height'] / 2
-            x_max = detection['x'] + detection['width'] / 2
-            y_max = detection['y'] + detection['height'] / 2
-
-            centroid_x = (x_min + x_max) / 2
-            centroid_y = (y_min + y_max) / 2
-            center_x = frame_width / 2  
-            self.publish_centroid(centroid_x, centroid_y, center_x)
-
-        self.publish_detection_status(detected)
+            logger.error(f'Failed to process image: {e}')
 
     def publish_centroid(self, x, y, center_x):
         centroid = Point()
-        centroid.x = x
-        centroid.y = y
-        centroid.z = center_x  
+        centroid.x = float(x)
+        centroid.y = float(y)
+        centroid.z = float(center_x)
         self.centroid_pub.publish(centroid)
-        logger.info(f"Published Pepsi can centroid: ({x}, {y}), with center_x: {center_x}")
+        logger.info(f"Published Pepsi can centroid: ({x}, {y}) with center_x: {center_x}")
 
     def publish_detection_status(self, detected):
         detection_status = Bool()
@@ -120,5 +97,7 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
+
+
 
 
