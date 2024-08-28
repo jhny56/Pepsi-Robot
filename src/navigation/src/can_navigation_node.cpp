@@ -1,4 +1,8 @@
 #include "navigation/can_navigation_node.hpp"
+#include <chrono>
+#include <functional>
+
+using namespace std::chrono_literals;
 
 CanNavigationNode::CanNavigationNode() : Node("can_navigation_node")
 {
@@ -34,11 +38,13 @@ CanNavigationNode::CanNavigationNode() : Node("can_navigation_node")
     } else {
         RCLCPP_ERROR(this->get_logger(), "Failed to get max_angular_speed_ parameter");
     }
+
+    timer_ = this->create_wall_timer(100ms, std::bind(&CanNavigationNode::timerCallback, this));
 }
 
 void CanNavigationNode::scanCallback(const std_msgs::msg::Float32::SharedPtr msg)
 {
-    front_distance_ = msg->data; //TODO
+    front_distance_ = msg->data;
 }
 
 void CanNavigationNode::detectionCallback(const std_msgs::msg::Bool::SharedPtr msg)
@@ -50,7 +56,10 @@ void CanNavigationNode::centroidCallback(const geometry_msgs::msg::Point::Shared
 {
     cx = msg->x;
     center_x = msg->z;
+}
 
+void CanNavigationNode::timerCallback()
+{
     geometry_msgs::msg::Twist cmd_vel_msg;
 
     if (!objectDetected) {
@@ -96,7 +105,6 @@ void CanNavigationNode::centroidCallback(const geometry_msgs::msg::Point::Shared
     }
     cmd_vel_publisher_->publish(cmd_vel_msg);
 }
-
 
 int main(int argc, char *argv[])
 {

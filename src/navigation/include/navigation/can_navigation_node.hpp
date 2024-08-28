@@ -20,12 +20,15 @@ private:
     void scanCallback(const std_msgs::msg::Float32::SharedPtr msg);
     void detectionCallback(const std_msgs::msg::Bool::SharedPtr msg);
     void centroidCallback(const geometry_msgs::msg::Point::SharedPtr msg);
+    void timerCallback();
 
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr detection_subscription_;
     rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr scan_subscription_;
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_publisher_;
     rclcpp::Subscription<geometry_msgs::msg::Point>::SharedPtr centroid_subscription_;
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr is_at_can_publisher_;
+
+    rclcpp::TimerBase::SharedPtr timer_;
 
     float front_distance_;
     int tolerance_ = 100;

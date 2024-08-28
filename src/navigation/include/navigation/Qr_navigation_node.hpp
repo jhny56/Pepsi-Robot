@@ -23,11 +23,14 @@ private:
     void detectionCallback(const std_msgs::msg::Bool::SharedPtr msg);
     void centroidCallback(const geometry_msgs::msg::Point::SharedPtr msg);
     void stripCallback(const std_msgs::msg::Int8::SharedPtr msg);
+    void timerCallback();
 
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr detection_subscription_;
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_publisher_;
     rclcpp::Subscription<geometry_msgs::msg::Point>::SharedPtr centroid_subscription_;
-     rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr strip_subscription_; 
+    rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr strip_subscription_; 
+
+    rclcpp::TimerBase::SharedPtr timer_;
 
     float front_distance_;
     int tolerance_ = 100;
@@ -38,6 +41,12 @@ private:
     double max_angular_speed_ = 0.7;
     bool objectDetected = false;
     bool is_at_strip_ = false;
+
+    bool sensor1;
+    bool sensor2;
+    bool sensor3;
+    bool sensor4;
+    bool sensor5;
 
     float cx=0;
     float center_x=0;

@@ -1,4 +1,8 @@
 #include "navigation/Qr_navigation_node.hpp"
+#include <chrono>
+#include <functional>
+
+using namespace std::chrono_literals;
 
 QrNavigationNode::QrNavigationNode() : Node("Qr_navigation_node")
 {
@@ -12,7 +16,6 @@ QrNavigationNode::QrNavigationNode() : Node("Qr_navigation_node")
     strip_subscription_ = this->create_subscription<std_msgs::msg::Int8>(
         "/lineDetectionData", 10,
         std::bind(&QrNavigationNode::stripCallback, this, std::placeholders::_1));
-
 
     cmd_vel_publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
 
@@ -35,6 +38,8 @@ QrNavigationNode::QrNavigationNode() : Node("Qr_navigation_node")
     } else {
         RCLCPP_ERROR(this->get_logger(), "Failed to get max_angular_speed_ parameter");
     }
+
+    timer_ = this->create_wall_timer(100ms, std::bind(&QrNavigationNode::timerCallback, this));
 }
 
 void QrNavigationNode::scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg)
@@ -51,7 +56,30 @@ void QrNavigationNode::centroidCallback(const geometry_msgs::msg::Point::SharedP
 {
     cx = msg->x;
     center_x = msg->z;
+}
 
+void QrNavigationNode::stripCallback(const std_msgs::msg::Int8::SharedPtr msg)
+{
+    is_at_strip_ = msg->data;
+
+    // Convert the integer value to a binary string (assuming 5 sensors, use a 5-bit binary)
+    std::bitset<5> binary_value(msg->data);
+
+    // Assign each bit to a corresponding sensor variable
+    sensor1 = binary_value[0];  // First sensor (least significant bit)
+    sensor2 = binary_value[1];  // Second sensor
+    sensor3 = binary_value[2];  // Third sensor
+    sensor4 = binary_value[3];  // Fourth sensor
+    sensor5 = binary_value[4];  // Fifth sensor (most significant bit)
+
+    // Log the binary value and the individual sensor states
+    RCLCPP_INFO(this->get_logger(), "Binary value: %s", binary_value.to_string().c_str());
+    RCLCPP_INFO(this->get_logger(), "Sensor 1: %d, Sensor 2: %d, Sensor 3: %d, Sensor 4: %d, Sensor 5: %d", 
+                sensor1, sensor2, sensor3, sensor4, sensor5);
+}
+
+void QrNavigationNode::timerCallback()
+{
     geometry_msgs::msg::Twist cmd_vel_msg;
 
     if (!objectDetected) {
@@ -59,22 +87,10 @@ void QrNavigationNode::centroidCallback(const geometry_msgs::msg::Point::SharedP
         cmd_vel_msg.angular.z = max_angular_speed_; // turn right
 
         RCLCPP_WARN(this->get_logger(), "No contours found");
-        // RCLCPP_INFO(this->get_logger(), "max_angular_speed_: %f", max_angular_speed_);
 
     } else {
-        // RCLCPP_INFO(this->get_logger(), "Found %lu contours", contours.size());
 
-        // // Calculate centroid and control logic
-        // cv::Moments M = cv::moments(contours[0]);
-        // int cx = int(M.m10 / M.m00);
-        // int cy = int(M.m01 / M.m00);
-
-        // RCLCPP_INFO(this->get_logger(), "Centroid of the largest contour: (%d, %d)", cx, cy);
-
-        // int center_x = mask.cols / 2;
         RCLCPP_INFO(this->get_logger(), "Center X: %d", center_x);
-
-         // Add distance check from the laser scan data
 
         // Scale angular velocity based on how far the centroid is from the center
         double error = center_x - cx;
@@ -82,17 +98,14 @@ void QrNavigationNode::centroidCallback(const geometry_msgs::msg::Point::SharedP
 
 
         double linear_speed = 0;
-        // RCLCPP_WARN(this->get_logger(), "Front Distance : %f",front_distance_);
 
-        if(!is_at_strip_){
-            // RCLCPP_WARN(this->get_logger(), "Object close! Slowing Down.");
+        if(is_at_strip_ != 31){
 
             linear_speed = max_linear_speed_;
 
         }else{
             linear_speed= 0.0; // Stop if too close
             tolerance_ = 0;
-
 
             // rclcpp::shutdown();
             // HERE WE NEED TO STOP THE GRABBER ACTION AND TELL THE NODE THAT WE STOPPED
@@ -110,19 +123,8 @@ void QrNavigationNode::centroidCallback(const geometry_msgs::msg::Point::SharedP
 
     }
     cmd_vel_publisher_->publish(cmd_vel_msg);
+
 }
-
-void QrNavigationNode::stripCallback(const std_msgs::msg::Int8::SharedPtr msg)
-{
-    is_at_strip_ = msg->data;
-     // Convert the integer value to a binary string
-    std::bitset<32> binary_value(msg->data);
-
-    // Now, binary_value is a std::bitset which can be used to get the binary representation
-    // For example, to print the binary representation:
-    RCLCPP_INFO(this->get_logger(), "Binary value: %s", binary_value.to_string().c_str());
-}
-
 
 
 int main(int argc, char *argv[])
