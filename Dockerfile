@@ -1,5 +1,5 @@
 # Use the custom base image created earlier
-FROM ros_galactic_with_deps
+FROM ros_galactic_with_pip
 
 # Set environment variables
 ENV ROS_WS=/ros2_ws
