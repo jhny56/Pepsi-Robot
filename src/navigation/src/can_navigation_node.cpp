@@ -39,7 +39,7 @@ CanNavigationNode::CanNavigationNode() : Node("can_navigation_node")
         RCLCPP_ERROR(this->get_logger(), "Failed to get max_angular_speed_ parameter");
     }
 
-    timer_ = this->create_wall_timer(100ms, std::bind(&CanNavigationNode::timerCallback, this));
+    timer_ = this->create_wall_timer(200ms, std::bind(&CanNavigationNode::timerCallback, this));
 }
 
 void CanNavigationNode::scanCallback(const std_msgs::msg::Float32::SharedPtr msg)

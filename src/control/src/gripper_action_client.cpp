@@ -1,4 +1,4 @@
-#include "../include/control/gripper_action_client.hpp"
+#include "control/gripper_action_client.hpp"
 
 GripperActionClient::GripperActionClient()
 : Node("gripper_action_client"), goal_active_(false)
@@ -28,6 +28,8 @@ void GripperActionClient::send_goal()
     std::bind(&GripperActionClient::result_callback, this, std::placeholders::_1);
 
   this->goal_handle_future_ = this->client_->async_send_goal(goal_msg, send_goal_options);
+  RCLCPP_INFO(this->get_logger(), "SENDING GRIPPER GOAL REQUEST");
+
 
 
 }

@@ -39,7 +39,7 @@ QrNavigationNode::QrNavigationNode() : Node("Qr_navigation_node")
         RCLCPP_ERROR(this->get_logger(), "Failed to get max_angular_speed_ parameter");
     }
 
-    timer_ = this->create_wall_timer(100ms, std::bind(&QrNavigationNode::timerCallback, this));
+    timer_ = this->create_wall_timer(200ms, std::bind(&QrNavigationNode::timerCallback, this));
 }
 
 

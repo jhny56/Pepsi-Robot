@@ -25,6 +25,9 @@ class PepsiCanDetector(Node):
         self.centroid_pub = self.create_publisher(Point, '/pepsi_can_centroid', 10)
         self.detection_pub = self.create_publisher(Bool, '/pepsi_can_detection', 10)
 
+        self.detectionImage = self.create_publisher(Image, '/pepsi_image_detection', 10)
+
+
         # Load the trained model from the specified path
         self.model = YOLO("/ros2_ws/weights.pt", task='detect')
 
@@ -40,12 +43,12 @@ class PepsiCanDetector(Node):
             # cv_image_rgb = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
 
             # Perform detection using the loaded model
+            # print("CV IMAGE : ",cv_image)
             results = self.model.predict(source=cv_image, conf=0.25, iou=0.45)
             result = results[0]  
-            annotated_image = result.plot()
+            annotated_image = result.plot() 
 
-            detected = False
-            centroid_x = None
+
             centroid_y = None
             center_x = None
 
@@ -62,14 +65,20 @@ class PepsiCanDetector(Node):
                 center_x = frame_width / 2
 
                 detected = True
+            
+            annotated_ros_image = self.bridge.cv2_to_imgmsg(annotated_image, encoding="bgr8")
+
+            self.detectionImage.publish(annotated_ros_image)
+
 
             
             if detected:
                 self.publish_centroid(centroid_x, centroid_y, center_x)
             self.publish_detection_status(detected)
 
+            print("DETECTION : " ,detected)
             
-            cv2.imwrite("/ros2_ws/detected_pepsi.jpg", annotated_image)
+            # cv2.imwrite("/ros2_ws/detected_pepsi.jpg", annotated_image)
 
         except Exception as e:
             logger.error(f'Failed to process image: {e}')

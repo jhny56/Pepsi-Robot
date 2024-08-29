@@ -3,7 +3,7 @@ FROM ros_galactic_with_pip
 
 # Set environment variables
 ENV ROS_WS=/ros2_ws
-ENV ROS_DOMAIN_ID=56
+ENV ROS_DOMAIN_ID=0
 ENV CMAKE_PREFIX_PATH=/opt/ros/galactic:$CMAKE_PREFIX_PATH
 
 # Create a workspace directory
@@ -32,6 +32,12 @@ RUN . /opt/ros/galactic/setup.sh && mkdir -p build && cd build && rm -rf CMakeCa
 # Source the workspace and setup entrypoint
 WORKDIR $ROS_WS
 RUN echo "source /ros2_ws/install/setup.bash" >> /root/.bashrc
+RUN echo "source /opt/ros/galactic/setup.bash" >> /root/.bashrc
+
 
 # Set the default command to run when the container starts
 CMD ["bash", "-c", "source /opt/ros/galactic/setup.bash && source /ros2_ws/install/setup.bash && cd /ros2_ws/src/behavior_tree/build && ./GROUPRMJ-ROBOTICS-COMPETITION"]
+# CMD ["bash", "-c", "source /opt/ros/galactic/setup.bash && source /ros2_ws/install/setup.bash && ros2 run perception pepsican_detector"]
+# CMD ["bash", "-c", "source /opt/ros/galactic/setup.bash && source /ros2_ws/install/setup.bash && ros2 run control gripper_action_client"]
+
+

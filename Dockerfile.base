@@ -4,7 +4,7 @@ FROM ros:galactic
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 ENV ROS_WS=/ros2_ws
-ENV ROS_DOMAIN_ID=56
+ENV ROS_DOMAIN_ID=0
 
 # Install ROS2 packages, common dependencies, and additional dependencies
 RUN apt-get update && apt-get install -y \
