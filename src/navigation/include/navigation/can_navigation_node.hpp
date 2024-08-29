@@ -32,7 +32,7 @@ private:
 
     float front_distance_;
     int tolerance_ = 100;
-    double stop_threshold_ = 0.7;
+    double stop_threshold_ = 6;
     double slow_down_threshold_ = 2.0;
     double angular_scaling_factor_ = 0.0005;
     double max_linear_speed_ = 0.5;

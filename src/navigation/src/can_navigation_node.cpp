@@ -84,7 +84,7 @@ void CanNavigationNode::timerCallback()
             RCLCPP_WARN(this->get_logger(), "speed_factor: %f", speed_factor);
 
             linear_speed = max_linear_speed_ * speed_factor;
-        } else {
+        } else if (front_distance_ != 0){
             linear_speed = 0.0; // Stop if too close
             tolerance_ = 0;
 
