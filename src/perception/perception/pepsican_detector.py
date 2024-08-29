@@ -37,10 +37,10 @@ class PepsiCanDetector(Node):
             cv_image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
             
             # Convert BGR image to RGB for the model
-            cv_image_rgb = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
+            # cv_image_rgb = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
 
             # Perform detection using the loaded model
-            results = self.model.predict(source=cv_image_rgb, conf=0.25, iou=0.45)
+            results = self.model.predict(source=cv_image, conf=0.25, iou=0.45)
             result = results[0]  
             annotated_image = result.plot()
 
