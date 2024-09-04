@@ -10,8 +10,10 @@ from ultralytics import YOLO # type: ignore
 import logging
 import numpy as np
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('pepsi_can_detector')
+
+logging.getLogger('ultralytics').setLevel(logging.ERROR)
 
 class PepsiCanDetector(Node):
     def __init__(self):
@@ -26,7 +28,7 @@ class PepsiCanDetector(Node):
         self.detection_pub = self.create_publisher(Bool, '/pepsi_can_detection', 10)
 
         # Load the trained model from the specified path
-        self.model = YOLO("/ros2_ws/weights.pt", task='detect')
+        self.model = YOLO("/ros2_ws/weights.pt", task='detect',verbose=False)
 
         logger.info('PepsiCanDetector node has been started.')
 
@@ -36,7 +38,7 @@ class PepsiCanDetector(Node):
             cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
             # np_arr = np.frombuffer(msg.data, np.uint8)
             # cv_image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-            print("CV IMAGE : ",cv_image)
+            # print("CV IMAGE : ",cv_image)
             cv_image_rgb = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
 
             # Perform detection using the loaded model
@@ -45,7 +47,7 @@ class PepsiCanDetector(Node):
             result = results[0]  # Get the first result
             annotated_image = result.plot()
 
-            print(result.boxes)
+            # print(result.boxes)
 
             detected = False
             centroid_x = None
@@ -75,7 +77,8 @@ class PepsiCanDetector(Node):
 
 
         except Exception as e:
-            logger.error(f'Failed to process image: {e}')
+            # logger.error(f'Failed to process image: {e}')
+            pass
 
     def publish_centroid(self, x, y, center_x):
         centroid = Point()
@@ -83,13 +86,13 @@ class PepsiCanDetector(Node):
         centroid.y = float(y)
         centroid.z = float(center_x)
         self.centroid_pub.publish(centroid)
-        logger.info(f"Published Pepsi can centroid: ({x}, {y}) with center_x: {center_x}")
+        # logger.info(f"Published Pepsi can centroid: ({x}, {y}) with center_x: {center_x}")
 
     def publish_detection_status(self, detected):
         detection_status = Bool()
         detection_status.data = detected
         self.detection_pub.publish(detection_status)
-        logger.info(f"Published Pepsi can detection status: {'Detected' if detected else 'Not Detected'}")
+        # logger.info(f"Published Pepsi can detection status: {'Detected' if detected else 'Not Detected'}")
 
 def main(args=None):
     rclpy.init(args=args)

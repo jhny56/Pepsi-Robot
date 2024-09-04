@@ -4,18 +4,30 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/image.hpp>
 #include <geometry_msgs/msg/twist.hpp>
-#include <cv_bridge/cv_bridge.h>
-#include <opencv2/opencv.hpp>
 #include <sensor_msgs/msg/laser_scan.hpp>
 #include "std_msgs/msg/bool.hpp"
 #include "geometry_msgs/msg/point.hpp"
+#include "rclcpp_action/rclcpp_action.hpp"
+#include "robot_hardware_interfaces/action/gripper_action.hpp"
 
 class CanNavigationNode : public rclcpp::Node
 {
 public:
+    using GripperAction = robot_hardware_interfaces::action::GripperAction;
+    using GoalHandleCanNavigation = rclcpp_action::ServerGoalHandle<GripperAction>;
+
     CanNavigationNode();
 
 private:
+    rclcpp_action::GoalResponse handle_goal(
+        const rclcpp_action::GoalUUID & uuid,
+        std::shared_ptr<const GripperAction::Goal> goal);
+
+    rclcpp_action::CancelResponse handle_cancel(
+        const std::shared_ptr<GoalHandleCanNavigation> goal_handle);
+
+    void execute(const std::shared_ptr<GoalHandleCanNavigation> goal_handle);
+    
     void imageCallback(const sensor_msgs::msg::Image::SharedPtr msg);
     void scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg);
     void detectionCallback(const std_msgs::msg::Bool::SharedPtr msg);
@@ -27,6 +39,8 @@ private:
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_publisher_;
     rclcpp::Subscription<geometry_msgs::msg::Point>::SharedPtr centroid_subscription_;
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr is_at_can_publisher_;
+
+    rclcpp_action::Server<GripperAction>::SharedPtr action_server_;
 
     float front_distance_;
     int tolerance_ = 100;

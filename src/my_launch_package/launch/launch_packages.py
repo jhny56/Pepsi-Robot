@@ -13,6 +13,7 @@ def generate_launch_description():
                 'launch',
                 'perception_launch.py'))
     )
+
     navigation_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(
@@ -29,8 +30,16 @@ def generate_launch_description():
                 'control_launch.py'))
     )
 
+    behavior_tree_node = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(
+                get_package_share_directory('robot_behavior_tree'),
+                'launch',
+                'launch_behavior_tree.py'))
+    )
+    
     return LaunchDescription([
         perception_launch,
         navigation_launch,
-        # control_launch
+        behavior_tree_node
     ])

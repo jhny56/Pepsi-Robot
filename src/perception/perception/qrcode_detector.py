@@ -30,19 +30,20 @@ class QRCodeDetector(Node):
 
             # Detect and decode the QR code
             data, bbox, _ = self.qr_code_detector.detectAndDecode(frame)
-            print(bbox)
+            # print(bbox)
             detected = False
             if bbox is not None and len(bbox) > 0:
                 # If a QR code was detected and successfully decoded
                 detected = True
-                self.get_logger().info(f"QR Code detected: {data}")
+                # self.get_logger().info(f"QR Code detected: {data}")
 
                 # Calculate and publish the centroid of the QR code
                 centroid = self.calculate_centroid(bbox, frame_width)
                 self.publish_centroid(centroid)
                 self.draw_bbox(frame, bbox)
             else:
-                self.get_logger().info("No QR Code detected.")
+                # self.get_logger().info("No QR Code detected.")
+                pass
 
             # Publish detection status
             self.publish_detection_status(detected)
@@ -76,13 +77,13 @@ class QRCodeDetector(Node):
         centroid_msg.y = centroid[1]
         centroid_msg.z = centroid[2]  
         self.centroid_pub.publish(centroid_msg)
-        self.get_logger().info(f"Published QR code centroid: ({centroid[0]}, {centroid[1]}), with center_x: {centroid[2]}")
+        # self.get_logger().info(f"Published QR code centroid: ({centroid[0]}, {centroid[1]}), with center_x: {centroid[2]}")
 
     def publish_detection_status(self, detected):
         detection_status = Bool()
         detection_status.data = detected
         self.detection_pub.publish(detection_status)
-        self.get_logger().info(f"Published QR code detection status: {'Detected' if detected else 'Not Detected'}")
+        # self.get_logger().info(f"Published QR code detection status: {'Detected' if detected else 'Not Detected'}")
 
 def main(args=None):
     rclpy.init(args=args)
