@@ -13,15 +13,15 @@ def generate_launch_description():
                 # Add parameters here if needed
             }],
         ),
-        # Node(
-        #     package='perception',
-        #     executable='qrcode_detector',  # Adjusted path for the Python node
-        #     name='qrcode_detector',
-        #     output='screen',
-        #     parameters=[{
-        #         # Add parameters here if needed
-        #     }],
-        # ),
+        Node(
+            package='perception',
+            executable='qrcode_detector',  # Adjusted path for the Python node
+            name='qrcode_detector',
+            output='screen',
+            parameters=[{
+                # Add parameters here if needed
+            }],
+        ),
         
 
     ])

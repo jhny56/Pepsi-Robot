@@ -7,6 +7,7 @@
 #include "robot_hardware_interfaces/action/gripper_action.hpp"
 #include "ament_index_cpp/get_package_share_directory.hpp"
 #include <memory>
+#include "std_msgs/msg/bool.hpp"
 
 class FindCanAction : public BT::AsyncActionNode
 {
@@ -23,6 +24,108 @@ public:
     static BT::PortsList providedPorts()
     {
         return { BT::InputPort<bool>("find_can") };
+    }
+
+    BT::NodeStatus tick() override
+    {
+        if (!goal_sent_)
+        {
+            if (!this->client_->wait_for_action_server(std::chrono::seconds(5)))
+            {
+                RCLCPP_ERROR(node_->get_logger(), "Action server not available after waiting");
+                return BT::NodeStatus::FAILURE;
+            }
+
+            auto goal_msg = GripperAction::Goal();
+
+            goal_handle_future_ = this->client_->async_send_goal(goal_msg);
+            goal_sent_ = true;
+            RCLCPP_ERROR(node_->get_logger(), "Goal sent to Server");
+        }
+
+        if (goal_handle_future_.valid())
+        {
+            auto status = goal_handle_future_.wait_for(std::chrono::seconds(1));
+            if (status == std::future_status::ready)
+            {
+                auto goal_handle = goal_handle_future_.get();
+                if (!goal_handle)
+                {
+                    RCLCPP_ERROR(node_->get_logger(), "Goal was rejected by the server");
+                    return BT::NodeStatus::FAILURE;
+                }
+                else
+                {
+                    RCLCPP_INFO(node_->get_logger(), "Goal was accepted by the server");
+                }
+
+                // Request the result
+                result_future_ = this->client_->async_get_result(goal_handle);
+            }
+            else
+            {
+                RCLCPP_INFO(node_->get_logger(), "Waiting for goal acceptance...");
+                return BT::NodeStatus::RUNNING;
+            }
+        }
+        else
+        {
+            RCLCPP_ERROR(node_->get_logger(), "Failed to send goal");
+            return BT::NodeStatus::FAILURE;
+        }
+
+        if (result_future_.valid())
+        {
+            auto status = result_future_.wait_for(std::chrono::seconds(60));
+            if (status == std::future_status::ready)
+            {
+                auto result = result_future_.get();
+                if (result.result->result)
+                {
+                    RCLCPP_INFO(node_->get_logger(), "Action succeeded");
+                    return BT::NodeStatus::SUCCESS;
+                }
+                else
+                {
+                    RCLCPP_ERROR(node_->get_logger(), "Action failed");
+                    return BT::NodeStatus::FAILURE;
+                }
+            }
+            else
+            {
+                RCLCPP_INFO(node_->get_logger(), "Waiting for result...");
+                return BT::NodeStatus::RUNNING;
+            }
+        }
+
+        return BT::NodeStatus::RUNNING;
+    }
+
+private:
+    rclcpp::Node::SharedPtr node_;
+    rclcpp_action::Client<GripperAction>::SharedPtr client_;
+    std::shared_future<typename GoalHandleGripperAction::SharedPtr> goal_handle_future_;
+    std::shared_future<typename GoalHandleGripperAction::WrappedResult> result_future_;
+
+    bool goal_sent_;
+};
+
+class FindQrCodeAction : public BT::AsyncActionNode
+{
+public:
+    using GripperAction = robot_hardware_interfaces::action::GripperAction;
+    using GoalHandleGripperAction = rclcpp_action::ClientGoalHandle<GripperAction>;
+
+    FindQrCodeAction(const std::string &name, const BT::NodeConfiguration &config, rclcpp::Node::SharedPtr node)
+        : BT::AsyncActionNode(name, config), node_(node) 
+    {
+        // Implementation to search for QR code
+        this->client_ = rclcpp_action::create_client<GripperAction>(node_, "qr_navigation");
+    }
+
+    static BT::PortsList providedPorts()
+    {
+        return { BT::InputPort<bool>("find_qr") };
     }
 
     BT::NodeStatus tick() override
@@ -64,7 +167,7 @@ public:
 
         if (result_future_.valid())
         {
-            auto status = result_future_.wait_for(std::chrono::milliseconds(1));
+            auto status = result_future_.wait_for(std::chrono::seconds(60));
             if (status == std::future_status::ready)
             {
                 auto result = result_future_.get();
@@ -100,6 +203,48 @@ private:
 };
 
 
+class IsAtCanCondition : public BT::ConditionNode
+{
+public:
+    IsAtCanCondition(const std::string &name, const BT::NodeConfiguration &config, rclcpp::Node::SharedPtr node)
+        : BT::ConditionNode(name, config), node_(node)
+    {
+        // Subscribe to the "/is_at_can" topic or any other topic that indicates whether the robot is at the can.
+        subscription_ = node_->create_subscription<std_msgs::msg::Bool>(
+            "/is_at_can", 10, std::bind(&IsAtCanCondition::callback, this, std::placeholders::_1));
+    }
+
+    static BT::PortsList providedPorts()
+    {
+        return {};
+    }
+
+    BT::NodeStatus tick() override
+    {
+        // If the robot is at the can, return SUCCESS, otherwise return FAILURE
+        if (is_at_can_)
+        {
+            RCLCPP_ERROR(node_->get_logger(), "ROBOT is at can");
+
+            return BT::NodeStatus::SUCCESS;
+        }
+        
+        RCLCPP_ERROR(node_->get_logger(), "ROBOT is not at can");
+
+        return BT::NodeStatus::FAILURE;
+    }
+
+private:
+    void callback(const std_msgs::msg::Bool::SharedPtr msg)
+    {
+        is_at_can_ = msg->data;
+    }
+
+    rclcpp::Node::SharedPtr node_;
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr subscription_;
+    bool is_at_can_ = false;  
+};
+
 int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);
@@ -108,11 +253,27 @@ int main(int argc, char **argv)
 
     BT::BehaviorTreeFactory factory;
 
-    // Register the node with a lambda that captures the node pointer
+    // Register FindCanAction
     factory.registerBuilder<FindCanAction>(
         "FindCanAction",
         [&node](const std::string &name, const BT::NodeConfiguration &config) {
             return std::make_unique<FindCanAction>(name, config, node);
+        }
+    );
+
+    // Register IsAtCanCondition
+    factory.registerBuilder<IsAtCanCondition>(
+        "IsAtCanCondition",
+        [&node](const std::string &name, const BT::NodeConfiguration &config) {
+            return std::make_unique<IsAtCanCondition>(name, config, node);
+        }
+    );
+
+    // Register FindQrCodeAction
+    factory.registerBuilder<FindQrCodeAction>(
+        "FindQrCodeAction",
+        [&node](const std::string &name, const BT::NodeConfiguration &config) {
+            return std::make_unique<FindQrCodeAction>(name, config, node);
         }
     );
 
@@ -137,4 +298,3 @@ int main(int argc, char **argv)
     rclcpp::shutdown();
     return 0;
 }
-

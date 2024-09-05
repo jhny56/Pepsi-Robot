@@ -1,8 +1,9 @@
 <root main_tree_to_execute="MainTree">
     <BehaviorTree ID="MainTree">
         <Sequence>
-            <FindCanAction/>
-            <!-- <FindQRCodeNode /> -->
+            <FindCanAction name="find_can_action" />
+            <IsAtCanCondition/>
+            <FindQrCodeAction/>
         </Sequence>
     </BehaviorTree>
 </root>

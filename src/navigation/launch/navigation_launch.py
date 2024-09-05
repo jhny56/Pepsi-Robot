@@ -21,13 +21,13 @@ def generate_launch_description():
                 # Add any parameters you want to set for the node here
             }]
         ),
-        # Node(
-        #     package='navigation',
-        #     executable='Qr_navigation_node',
-        #     name='Qr_navigation_node',
-        #     output='screen',
-        #     parameters=[params_file]
-        # ),
+        Node(
+            package='navigation',
+            executable='Qr_navigation_node',
+            name='Qr_navigation_node',
+            output='screen',
+            parameters=[params_file]
+        ),
         Node(
             package='navigation',
             executable='can_navigation_node',

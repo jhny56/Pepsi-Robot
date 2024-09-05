@@ -4,31 +4,51 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/image.hpp>
 #include <geometry_msgs/msg/twist.hpp>
-#include <cv_bridge/cv_bridge.h>
-#include <opencv2/opencv.hpp>
 #include <sensor_msgs/msg/laser_scan.hpp>
 #include "std_msgs/msg/bool.hpp"
 #include "geometry_msgs/msg/point.hpp"
+#include "rclcpp_action/rclcpp_action.hpp"
+#include "robot_hardware_interfaces/action/gripper_action.hpp"
 
 class QrNavigationNode : public rclcpp::Node
 {
 public:
+    using GripperAction = robot_hardware_interfaces::action::GripperAction;
+    using GoalHandleQrNavigation = rclcpp_action::ServerGoalHandle<GripperAction>;
+
     QrNavigationNode();
 
 private:
+    // Action methods
+    rclcpp_action::GoalResponse handle_goal(
+        const rclcpp_action::GoalUUID & uuid,
+        std::shared_ptr<const GripperAction::Goal> goal);
+
+    rclcpp_action::CancelResponse handle_cancel(
+        const std::shared_ptr<GoalHandleQrNavigation> goal_handle);
+
+    void execute(const std::shared_ptr<GoalHandleQrNavigation> goal_handle);
+
+    // Callback methods
     void imageCallback(const sensor_msgs::msg::Image::SharedPtr msg);
     void scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg);
     void detectionCallback(const std_msgs::msg::Bool::SharedPtr msg);
     void centroidCallback(const geometry_msgs::msg::Point::SharedPtr msg);
     void stripCallback(const std_msgs::msg::Bool::SharedPtr msg);
 
+    // ROS 2 Subscriptions and Publishers
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr detection_subscription_;
     rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_subscription_;
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_subscription_;
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_publisher_;
     rclcpp::Subscription<geometry_msgs::msg::Point>::SharedPtr centroid_subscription_;
-     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr strip_subscription_; 
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr strip_subscription_;
+    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr is_at_qr_publisher_;
 
+    // ROS 2 Action Server
+    rclcpp_action::Server<GripperAction>::SharedPtr action_server_;
+
+    // Navigation-related variables
     float front_distance_;
     int tolerance_ = 100;
     double stop_threshold_ = 0.3;
@@ -39,8 +59,8 @@ private:
     bool objectDetected = false;
     bool is_at_strip_ = false;
 
-    float cx=0;
-    float center_x=0;
+    float cx = 0;
+    float center_x = 0;
 };
 
 #endif  // QR_NAVIGATION_NODE_HPP_
